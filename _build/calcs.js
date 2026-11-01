@@ -43,7 +43,7 @@ svc(v){if(!need(v,['t','n','d']))return err(BAD);if(v.n<=0||v.d<0||v.d>v.n)retur
 txn(v){if(!need(v,['a','c']))return err(BAD);const e=EV[v.ev];if(!e)return err(BAD);if(v.a<0)return err('סכום העסקה חייב להיות חיובי.');if(e.cash&&(v.c<0||v.c>v.a))return err('החלק שבמזומן חייב להיות בין 0 לסכום העסקה.');
  const r=e.f(v.a,e.cash?v.c:0),clean=x=>x.filter(p=>p[1]!==0),sum=x=>x.reduce((s,p)=>s+p[1],0),A=clean(r.A),L=clean(r.L),Q=clean(r.E),da=sum(A),dl=sum(L),dq=sum(Q);
  const col=(t,x)=>`<div class="fxc"><b>${t}</b>${x.length?x.map(p=>it(p[0],p[1])).join(''):'<span class="it">אין שינוי</span>'}</div>`;
- return `<div class="fx">${col('נכסים',A)}${col('התחייבויות',L)}${col('הון עצמי',Q)}</div>`+eq(`${sgn(da)} = ${sgn(dl)} + ${sgn(dq)}`)+res('שינוי בסך המאזן',sgn(da),'',1)+ln(!e.cash?'השדה ״מתוכו במזומן״ אינו משפיע על אירוע זה.':(da===0?'סך המאזן לא השתנה.':'לכל סעיף שהשתנה יש סעיף מקביל.'));},
+ return `<div class="fx">${col('נכסים',A)}${col('התחייבויות',L)}${col('הון עצמי',Q)}</div>`+eq(`${money(da)} = ${money(dl)} + ${dq<0?'('+money(dq)+')':money(dq)}`)+res('שינוי בסך המאזן',sgn(da),'',1)+ln(!e.cash?'השדה ״מתוכו במזומן״ אינו משפיע על אירוע זה.':(da===0?'סך המאזן לא השתנה.':'לכל סעיף שהשתנה יש סעיף מקביל.'));},
 int(v){if(!need(v,['p','r','m']))return err(BAD);const x=v.p*(v.r/100)*v.m/12;
  return eq(`${money(x)} = ${money(v.p)} × ${v.r}% × ${fr(v.m,12)}`)+res('הוצאת ריבית בתקופה',money(x),'',1)+res('ריבית לשלם, אם טרם שולמה',money(x),1)+ln('ההוצאה נרשמת לפי חלוף הזמן, ולא לפי מועד התשלום. הקרן עצמה מסווגת לפי מועד פירעונה.');}
 };
