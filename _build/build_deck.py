@@ -7,7 +7,7 @@ MODE = 'deck'
 for f in ('content_a.py', 'content_b.py', 'content_c.py'):
     exec(R(f))
 
-SEC = '<span class="n">2026</span>ג'
+SEC = '<span class="n">2027</span>א'
 
 
 def render(s, total):
