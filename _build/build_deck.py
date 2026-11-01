@@ -4,7 +4,7 @@ H = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, H)
 R = lambda f: open(os.path.join(H, f), encoding='utf8').read()
 MODE = 'deck'
-for f in ('content_a.py', 'content_b.py', 'content_c.py'):
+for f in ('content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'):
     exec(R(f))
 
 SEC = '<span class="n">2027</span>א'
@@ -29,6 +29,7 @@ def render(s, total):
                 f'<p class="sub" style="font-size:25px;margin-top:20px;color:#c8d4f2;max-width:940px">{TX(NEXT_P)}</p>'
                 '<p class="sub" style="font-size:22px;margin-top:26px;color:#c8d4f2">שאלות ותיקונים: <span dir="ltr">Shay.tsaban@gmail.com</span></p></div></section>')
     if k == 'opener':
+        if s.get('hidden'): return ''
         n = s['part']
         when = f'לעבודה עצמית · כ-{s["mins"]} דקות' if n >= 9 else f'כ-{s["mins"]} דקות'
         note = f'<div class="pd-note">{TX(s["note"])}</div>' if s.get('note') else ''
@@ -45,7 +46,7 @@ NSELF = sum(s['id'].startswith('h-v') and 'class="mc"' in s['body'] for s in SL)
 NPREP -= NSELF
 NEXT_H = 'במפגש הבא: <span style="color:#7fe3d6">נכסים שוטפים</span>'
 NEXT_P = 'לקוחות, מלאי והשקעות למסחר: שלושה נכסים שוטפים, מהותם והשפעתם על הדיווח.'
-slides_html = '\n'.join(render(s, TOTAL_PARTS) for s in SL)
+slides_html = '\n'.join(filter(None, (render(s, TOTAL_PARTS) for s in SL)))
 
 fonts = R('shell/fonts.css')
 base = R('shell/base.css')

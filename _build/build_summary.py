@@ -4,7 +4,7 @@ H = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, H)
 R = lambda f: open(os.path.join(H, f), encoding='utf8').read()
 MODE = 'pdf'
-for f in ('content_a.py', 'content_b.py', 'content_c.py'):
+for f in ('content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'):
     exec(R(f))
 FONTS = os.path.join(H, '..', '..', 'iit-build', 'fonts')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -46,7 +46,7 @@ sup,sub{font-size:.68em;line-height:0}
 .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .6mm;font-size:.92em}
 .frac>span{padding:0 1.2mm;white-space:nowrap}
 .frac>span:first-child{border-bottom:.3mm solid currentColor}
-.row{display:flex;gap:3mm}.row.eq2>*{flex:1 1 0;min-width:0}
+.row{display:flex;gap:3mm}.row.eq2>*,.row.eq3>*{flex:1 1 0;min-width:0}
 .col{display:block}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
 .card{border:.25mm solid var(--line);border-radius:1.6mm;padding:1.6mm 2.4mm;margin:0 0 1.6mm;break-inside:avoid;background:#fff}
@@ -143,6 +143,11 @@ tr{break-inside:avoid}
 .tt span.li{display:block}
 .tt small{display:block;font-size:9.4pt;color:var(--mut)}
 .tt span.no{color:var(--mut)}
+.txev{font-weight:700;color:var(--navy);margin:0 0 .6mm}
+.txb{margin:.6mm 0;padding-right:5mm}
+.txb li{margin-bottom:.3mm}
+.ka{color:#087469}.kb{color:#4f33c9}.kc{color:#a86703}
+.txsu{display:flex;justify-content:space-between;gap:3mm;font-size:10.6pt;background:#f1ece0;border-radius:1.2mm;padding:.5mm 2mm;margin-bottom:1mm;break-inside:avoid}
 .tt tr.cum td{border-top:.3mm solid var(--line);font-weight:700}
 .ttc{font-size:10pt;color:var(--mut);text-align:center;margin-top:.5mm}
 .ttg{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm}

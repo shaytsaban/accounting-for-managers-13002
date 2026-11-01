@@ -50,6 +50,8 @@ for (name, a), (_, b) in zip(idx, idx[1:]):
     miss_total += len(nums)
 print('numbers missing overall:', miss_total)
 
+# question number in the docx -> number in the deck, where six questions were moved into the transactions part
+RENUM = {7: 1, 16: 2, 13: 3, 9: 4, 12: 5, 14: 6, 1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12, 8: 13, 10: 14, 11: 15, 15: 16, 17: 17, 18: 18, 19: 19, 20: 20}
 # the question text itself must be in that question's own slide, word for word (punctuation aside)
 def norm(s):
     s = html.unescape(re.sub(r'<[^>]+>', ' ', s))
@@ -59,7 +61,7 @@ bad = checked = 0
 for i in range(1, 21):
     a = next(k for k, t in enumerate(paras) if t.startswith(f'שאלת תרגול {i}:'))
     b = next((k for k, t in enumerate(paras) if t.startswith(f'שאלת תרגול {i + 1}:')), len(paras))
-    slide = norm(blocks[f'q{i}'])
+    slide = norm(blocks[f'q{RENUM[i]}'])
     for t in paras[a:b]:
         m = re.match(r'^(טענה \d: ?|[א-ה]\. )', t)
         if not m and not t.startswith(('לפניכם', 'הטענה /', 'חברה ', 'לחברה', 'ב-1.12', 'איזו')): continue

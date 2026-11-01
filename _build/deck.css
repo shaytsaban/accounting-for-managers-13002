@@ -19,7 +19,7 @@ ul.lg{padding-inline-start:24px}ul.lg li{margin-bottom:8px}
 .ct{display:block;font-size:21px;font-weight:800;color:var(--coral);margin-bottom:8px;line-height:1.3}
 .row{display:flex;gap:16px}
 .col{display:flex;flex-direction:column;gap:12px}
-.row.eq2>*{flex:1 1 0;min-width:0}
+.row.eq2>*,.row.eq3>*{flex:1 1 0;min-width:0}
 .row.top{align-items:stretch}
 .card{background:var(--card);border-radius:16px;box-shadow:0 2px 0 var(--line),0 10px 26px rgba(22,33,58,.06);padding:15px 20px}
 .def p{font-size:22px;line-height:1.42;margin:4px 0 8px}
@@ -358,3 +358,15 @@ svg .st:not(.show){opacity:0}
 .pqq.lg .mc .o{font-size:21.5px;padding:7px 12px}
 .pqq.lg .sopts p{font-size:21.5px}
 .pqq.lg .mc .w{font-size:19.5px}
+/* one transaction, three clicks */
+.txev{font-size:27px;font-weight:800;color:var(--navy2);background:#fff;border-radius:14px;padding:11px 18px;margin-bottom:10px;line-height:1.3;box-shadow:0 2px 0 var(--line)}
+.tt td.rvc{position:relative;height:58px;font-size:24px}
+.rvc .qm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--mut);transition:opacity .25s}
+.rvc .st.show+.qm{opacity:0}
+.txb{margin:8px 0;padding-inline-start:24px;font-size:25px;line-height:1.32}
+.txb li{margin-bottom:5px}
+.ka{color:#087469}.kb{color:#4f33c9}.kc{color:#a86703}
+.txsu{display:flex;justify-content:space-between;align-items:center;gap:18px;font-size:21px;background:#f6f2ea;border-radius:10px;padding:7px 14px}
+.txsu .sa{margin:0 6px}
+.txchk{white-space:nowrap}
+@media print{.qm{display:none!important}}
