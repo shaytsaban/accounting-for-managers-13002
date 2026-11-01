@@ -1,5 +1,5 @@
 # Screenshot chosen slides with every reveal shown. Usage: python3 shots.py outdir [ids...] (no ids: all, in parallel)
-import os, re, subprocess, sys, tempfile, concurrent.futures as cf
+import os, re, shutil, subprocess, sys, tempfile, concurrent.futures as cf
 H = os.path.dirname(os.path.abspath(__file__))
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
@@ -13,6 +13,8 @@ all_ids = re.findall(r'<section class="slide[^"]*" id="([^"]+)"', src)
 def one(i):
     n = all_ids.index(i) + 1
     subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--no-sandbox', f'--user-data-dir={d}/p{n}', '--window-size=1280,764', '--virtual-time-budget=3000', '--hide-scrollbars', f'--screenshot={out}/{n:03d}-{i}.png', f'file://{p}#{i}'], capture_output=True, timeout=120)
+    shutil.rmtree(f'{d}/p{n}', ignore_errors=True)   # a profile per slide would otherwise fill the disk
 with cf.ThreadPoolExecutor(6) as ex:
     list(ex.map(one, ids))
+shutil.rmtree(d, ignore_errors=True)
 print(len(ids))

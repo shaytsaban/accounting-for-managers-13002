@@ -1,10 +1,10 @@
 # Headless test: inject a script into a copy of the deck, read the JSON from data-test in the dumped DOM.
 # Usage: python3 test_deck.py [path to presentation.html]
-import json, os, re, subprocess, sys, tempfile
+import json, os, re, shutil, subprocess, sys, tempfile
 H = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(H, '..', 'lectures', 'lecture-1', 'presentation.html')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-EXPECT = {'eq': '172,000', 'class': 'התחייבות שוטפת', 're': '72,000', 'bs': '320,000', 'pl': '60,000', 'svc': '15,000', 'txn': '+80,000', 'int': '3,000'}
+EXPECT = {'class': 'התחייבות שוטפת', 're': '72,000', 'bs': '320,000', 'pl': '60,000', 'svc': '15,000', 'txn': '+80,000', 'int': '3,000'}
 # inputs that reproduce further answers from the lesson: calc -> ({field: value}, expected)
 ALT = [('class', dict(m='36', k='l'), 'התחייבות לא שוטפת'), ('class', dict(m='12', k='a'), 'נכס שוטף'), ('class', dict(m='13', k='a'), 'נכס לא שוטף'),
        ('re', dict(o='30000', n='55000', d='25000'), '60,000'), ('re', dict(o='72000', n='-10000', d='0'), '62,000'),
@@ -12,8 +12,7 @@ ALT = [('class', dict(m='36', k='l'), 'התחייבות לא שוטפת'), ('cla
        ('svc', dict(t='120000', n='12', d='1', side='prov'), '10,000'), ('int', dict(p='300000', r='8', m='4'), '8,000'),
        ('txn', dict(a='100000', c='0', ev='issue'), '+100,000'), ('txn', dict(a='200000', c='0', ev='loan'), '+200,000'), ('txn', dict(a='5000', c='0', ev='elec'), '0'),
        ('txn', dict(a='12000', c='0', ev='paysup'), '−12,000'), ('txn', dict(a='10000', c='5000', ev='div'), '−5,000'), ('txn', dict(a='60000', c='20000', ev='machine'), '+40,000'),
-       ('txn', dict(a='60000', c='60000', ev='machine'), '0'), ('txn', dict(a='30000', c='0', ev='collect'), '0'), ('txn', dict(a='20000', c='0', ev='adv'), '+20,000'), ('txn', dict(a='12000', c='0', ev='prep'), '0'),
-       ('eq', dict(a='500000', l='350000'), '150,000')]
+       ('txn', dict(a='60000', c='60000', ev='machine'), '0'), ('txn', dict(a='30000', c='0', ev='collect'), '0'), ('txn', dict(a='20000', c='0', ev='adv'), '+20,000'), ('txn', dict(a='12000', c='0', ev='prep'), '0')]
 TEST = r'''
 (function(){
 const D=window.__deckT,R={errors:[],overflow:[],small:[],mc:[],calc:[],alt:[],reveal:[],terms:[],abbr:{},chars:[],eqwide:[]};
@@ -92,6 +91,7 @@ d = tempfile.mkdtemp(dir=os.environ.get('TMPDIR'))
 p = os.path.join(d, 't.html')
 open(p, 'w', encoding='utf8').write(html)
 out = subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--no-sandbox', f'--user-data-dir={d}/prof', '--window-size=1280,764', '--virtual-time-budget=60000', '--dump-dom', 'file://' + p], capture_output=True, text=True, timeout=300).stdout
+shutil.rmtree(d, ignore_errors=True)
 m = re.search(r'<html[^>]*data-test="([^"]*)"', out)
 if not m:
     print('NO RESULT'); print(out[:400]); sys.exit(1)

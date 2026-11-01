@@ -20,7 +20,7 @@ def render(s, total):
                 f'<div class="kick" style="color:#ffb199"><span>{COURSE} · האוניברסיטה הפתוחה · {TX("קורס 13002 · מפגש 1")}</span></div>'
                 '<h1><span>מבוא לחשבונאות</span> <span style="color:#7fe3d6">ודיווח כספי</span></h1>'
                 '<p class="sub" style="margin-top:20px;font-size:27px;color:#c8d4f2">' + TX('תפקיד החשבונאות הפיננסית, מבנה הדוחות הכספיים, ההגדרות היסודיות, בסיס הצבירה והזהות החשבונאית.') + '</p>'
-                '<div class="chipbar" style="margin-top:24px">' + ''.join(f'<span class="chip">{TX(c)}</span>' for c in ['20 שאלות תרגול', f'{NCALC} מחשבונים', f'{NMC} בדיקות הבנה', 'מילון מושגים']) + '</div></div>'
+                '<div class="chipbar" style="margin-top:24px">' + ''.join(f'<span class="chip">{TX(c)}</span>' for c in ['20 שאלות תרגול', f'{NPREP} שאלות הכנה', f'{NSELF} שאלות לתרגול עצמי', f'{NCALC} מחשבונים']) + '</div></div>'
                 f'<div style="position:absolute;right:70px;bottom:58px;font-size:22px;color:#c8d4f2"><b style="color:#fff">מרכז ההוראה: ד״ר שי צבאן</b> · סמסטר {SEC}</div></section>')
     if k == 'end':
         return ('<section class="slide dark s1" id="s-end" data-title="סיום"><div style="position:relative;max-width:980px;margin-top:110px">'
@@ -30,7 +30,7 @@ def render(s, total):
                 '<p class="sub" style="font-size:22px;margin-top:26px;color:#c8d4f2">שאלות ותיקונים: <span dir="ltr">Shay.tsaban@gmail.com</span></p></div></section>')
     if k == 'opener':
         n = s['part']
-        when = f'כ-{s["mins"]} דקות'
+        when = f'לעבודה עצמית · כ-{s["mins"]} דקות' if n >= 9 else f'כ-{s["mins"]} דקות'
         note = f'<div class="pd-note">{TX(s["note"])}</div>' if s.get('note') else ''
         return (f'<section class="slide dark pd" id="{s["id"]}" data-title="{s["title"]}" style="--pc:#7fe3d6"><div class="pd-num{" w" if n >= 10 else ""}">{n}</div><div class="pd-in">'
                 f'<div class="kick" style="color:#ffb199"><span>חלק <span class="n">{n}</span> מתוך <span class="n">{total}</span> · {TX(when)}</span></div><div class="pd-h">{s["h"]}</div><div class="pd-q">{TX(s["q"])}</div>{note}'
@@ -40,7 +40,9 @@ def render(s, total):
 
 
 NCALC = sum(1 for s in SL if s['id'].startswith('c-'))
-NMC = sum(s['body'].count('class="mc"') for s in SL)
+NPREP = sum(s['id'].startswith('h-') and 'id="pq-h-' in s['body'] for s in SL if 'c2' not in s['id'])
+NSELF = sum(s['id'].startswith('h-v') and 'class="mc"' in s['body'] for s in SL)
+NPREP -= NSELF
 NEXT_H = 'במפגש הבא: <span style="color:#7fe3d6">נכסים שוטפים</span>'
 NEXT_P = 'לקוחות, מלאי והשקעות למסחר: שלושה נכסים שוטפים, מהותם והשפעתם על הדיווח.'
 slides_html = '\n'.join(render(s, TOTAL_PARTS) for s in SL)
@@ -68,5 +70,5 @@ for m in re.finditer(r'class="([^"]+)"', slides_html + tail + R('deck.js') + R('
     for c in m.group(1).split():
         if re.fullmatch(r'[\w-]+', c): used.add(c)
 missing = sorted(c for c in used if not re.search(r'\.' + re.escape(c) + r'(?![\w-])', css))
-print('slides', html.count('<section class="slide'), 'calcs', NCALC, 'bytes', len(html))
+print('slides', html.count('<section class="slide'), 'calcs', NCALC, 'prep', NPREP, 'self', NSELF, 'bytes', len(html))
 print('classes without a rule:', missing)

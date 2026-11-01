@@ -277,3 +277,84 @@ svg .st:not(.show){opacity:0}
 .clm.xl .bd p{font-size:29px;line-height:1.42;margin-bottom:8px}
 .clm.xl .tg{font-size:25px}
 .clm.xl .vd{font-size:21px}
+/* ===== transaction table, principles, flowcharts, illustrations ===== */
+.mt{margin-top:12px}
+.ic{display:inline-block;vertical-align:-6px;flex:none;margin-inline-end:6px}
+.ill{display:block;width:100%;height:auto;font-family:inherit;direction:ltr;unicode-bidi:isolate}
+.illw{background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 0 var(--line)}
+.rule{background:var(--navy2);color:#fff;border-radius:14px;padding:11px 20px;font-size:26px;font-weight:700;line-height:1.3;margin:10px 0}
+.rule b{color:#ffb199}
+.rule .m{color:#fff}
+.prin{list-style:none;display:grid;gap:12px;counter-reset:s}
+.prin li{counter-increment:s;display:flex;gap:16px;align-items:center;background:#fff;border-radius:14px;padding:15px 20px;font-size:27px;font-weight:600;line-height:1.3;box-shadow:0 2px 0 var(--line)}
+.prin li:before{content:counter(s);flex:none;width:44px;height:44px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800;font-size:22px}
+.ttw{background:#fff;border-radius:14px;padding:8px 14px;box-shadow:0 2px 0 var(--line);margin-bottom:10px}
+.clm .ttw{box-shadow:none;padding:4px 0 0;margin:4px 0 2px}
+.tth{font-size:22px;font-weight:800;color:var(--navy2);line-height:1.3;margin-bottom:5px}
+.tt{width:100%;border-collapse:separate;border-spacing:0}
+.tt th{font-size:19.5px;font-weight:800;padding:4px 10px;width:31%;text-align:center}
+.tt th.ta{background:var(--assetbg);color:#087469;border-radius:9px 9px 0 0}
+.tt th.tb{background:var(--liabbg);color:#4f33c9;border-radius:9px 9px 0 0}
+.tt th.tc{background:var(--eqbg);color:#a86703;border-radius:9px 9px 0 0}
+.tt td{font-size:21px;line-height:1.3;padding:6px 10px;vertical-align:top;text-align:center}
+.tt td.ta{background:#f1fbf9}
+.tt td.tb{background:#f6f4ff}
+.tt td.tc{background:#fff9ec}
+.tt .op{width:3.5%;background:none;padding:0;font-size:25px;font-weight:800;color:var(--navy2);vertical-align:middle;text-align:center}
+.tt span.li{display:block}
+.tt small{display:block;font-size:17.5px;color:var(--mut);line-height:1.2}
+.tt span.no{color:var(--mut);font-size:19px}
+.tt tr.cum td{border-top:2px solid var(--line);font-weight:800;font-size:22px}
+.tt tr.cum td.op{border-top:0}
+.ttc{font-size:19px;color:var(--mut);text-align:center;margin-top:5px;font-weight:600}
+.ttg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.ttg .ttw{margin-bottom:0}
+/* flowcharts */
+.dec .lab{display:inline-block;font-weight:800;margin-inline-end:6px}
+.dec.sm{gap:8px;margin:0}
+.dec.sm .dq{font-size:20px;padding:10px;background:var(--navy2)}
+.dec.sm .da{font-size:20px;padding:7px 10px}
+.dec.sm .farr{font-size:24px}
+.dbr>.dec{background:#f6f2ea;border-radius:12px;padding:6px}
+.fnode .ic{margin:0 0 4px;display:block}
+.fnode.col{flex-direction:column}
+/* ===== lively layer: punchlines, cartoons, a question beside its solution ===== */
+.pun{font-size:24px;font-weight:800;color:#b8391f;line-height:1.3;margin:8px 0;padding-inline-start:16px;border-inline-start:5px solid var(--coral)}
+.toon{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 0 var(--line);text-align:center}
+.tn{display:block;width:100%;max-height:210px;height:auto;direction:ltr;unicode-bidi:isolate}
+.toon .tc{font-size:21px;font-weight:800;color:#b8391f;line-height:1.25;margin-top:4px}
+.toonr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,.7fr);gap:16px;align-items:start}
+.pita{display:block;width:100%;border-radius:10px}
+.pq2{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:14px;align-items:start}
+.pqq{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pqq .qstem{padding:10px 14px}
+.pqq .qstem p{font-size:20px;line-height:1.33;margin:0 0 5px}
+.pqq .qstem.sm p{font-size:18px;line-height:1.28;margin:0 0 3px}
+.pqq .mc{padding:8px 12px}
+.pqq .mc .q{font-size:20px;line-height:1.3}
+.pqq .mc .o{font-size:19px;padding:4px 10px;margin-top:4px;line-height:1.25}
+.pqq .mc .w{font-size:18px;margin-top:5px;padding:4px 10px;line-height:1.28}
+.pqq .sopts{background:#fff;border-radius:14px;padding:8px 14px;box-shadow:0 2px 0 var(--line)}
+.pqq .sopts .q{font-size:20px;font-weight:800;line-height:1.3;margin-bottom:3px}
+.pqq .sopts p{font-size:19px;line-height:1.28;margin:0 0 3px}
+.pqa{min-width:0}
+.pqa .clm{display:block;padding:8px 14px;margin-bottom:8px}
+.pqa .clm .hd{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+.pqa .clm .vd{margin-top:0}
+.pqa .clm .bd p{font-size:21.5px;line-height:1.33;margin:0 0 4px}
+.pqa .clm.big .bd p,.pqa .clm.xl .bd p{font-size:24px;line-height:1.36}
+.pqa .clm .tg{font-size:21px}
+.pqa .clm .tt td{font-size:19.5px;padding:4px 6px}
+.pqa .clm .tt th{font-size:18px;padding:3px 6px}
+.pqa .clm .tt small{font-size:16.5px}
+.pqa .clm .ttc{font-size:18px;margin-top:3px}
+.pqa .band.ans{margin-top:6px;font-size:23px;padding:7px 14px}
+.pqa .pun{font-size:22px;margin:6px 0 0}
+.tbl2.tight{font-size:20.5px}
+.tbl2.tight td{padding:6px 10px;line-height:1.25}
+.tbl2.tight th{padding:6px 10px}
+.pqq.lg .qstem p{font-size:23px}
+.pqq.lg .mc .q,.pqq.lg .sopts .q{font-size:23px}
+.pqq.lg .mc .o{font-size:21.5px;padding:7px 12px}
+.pqq.lg .sopts p{font-size:21.5px}
+.pqq.lg .mc .w{font-size:19.5px}

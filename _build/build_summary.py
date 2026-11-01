@@ -122,6 +122,44 @@ tr{break-inside:avoid}
 .clm .bd p{margin:0 0 .5mm}
 .band.ans{margin-bottom:2mm}
 .route.r4{grid-template-columns:repeat(4,1fr)}
+.mt{margin-top:1.4mm}
+.ic{display:inline-block;vertical-align:-1mm;margin-left:1mm;width:5mm;height:5mm}
+.ill{display:block;width:150mm;max-width:100%;height:auto;margin:1mm auto;font-family:"David";direction:ltr;unicode-bidi:isolate}
+.illw{break-inside:avoid;margin:1mm 0}
+.rule{background:var(--navy);color:#fff;border-radius:1.2mm;padding:1.1mm 2.6mm;margin:1.2mm 0;font-weight:700;break-inside:avoid}
+.rule b{color:#ffb199}
+.rule .m{color:#fff}
+.prin{margin:0 0 1.5mm;padding-right:6mm;font-weight:700}
+.prin li{margin-bottom:.5mm}
+.ttw{border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm 1.6mm;margin:1mm 0;break-inside:avoid}
+.clm .ttw{border:0;padding:.4mm 0;margin:.5mm 0}
+.tth{font-weight:700;color:var(--navy);margin-bottom:.6mm}
+.tt{width:100%;border-collapse:collapse;font-size:10.6pt;table-layout:fixed}
+.tt th{padding:.3mm 1mm;text-align:center;font-weight:700}
+.tt th.ta{background:#dff5f2;color:#087469}.tt th.tb{background:#ece8ff;color:#4f33c9}.tt th.tc{background:#fff0d2;color:#a86703}
+.tt td{padding:.4mm 1mm;text-align:center;vertical-align:top;line-height:1.2}
+.tt td.ta{background:#f1fbf9}.tt td.tb{background:#f6f4ff}.tt td.tc{background:#fff9ec}
+.tt .op{width:5mm;background:none;font-weight:700;vertical-align:middle}
+.tt span.li{display:block}
+.tt small{display:block;font-size:9.4pt;color:var(--mut)}
+.tt span.no{color:var(--mut)}
+.tt tr.cum td{border-top:.3mm solid var(--line);font-weight:700}
+.ttc{font-size:10pt;color:var(--mut);text-align:center;margin-top:.5mm}
+.ttg{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm}
+.ttg .ttw{margin:0}
+.dbr>.dec{background:#f6f2ea;border-radius:1.2mm;padding:.6mm}
+.dec.sm .dq{padding:1mm;font-size:10.6pt}
+.dec.sm .da{padding:.6mm 1.4mm;font-size:10.6pt;margin-bottom:.6mm}
+.lab{font-weight:700}
+.pun{font-weight:700;color:#b8391f;margin:1mm 0;padding-right:2.4mm;border-right:1mm solid var(--coral);break-inside:avoid}
+.toon{text-align:center;border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm;break-inside:avoid}
+.tn{display:block;width:38mm;height:auto;margin:0 auto;direction:ltr;unicode-bidi:isolate}
+.toon .tc{font-weight:700;color:#b8391f;font-size:10.6pt}
+.toonr{display:grid;grid-template-columns:1fr 44mm;gap:2mm;align-items:start}
+.pita{display:block;width:34mm;margin:0 auto;border-radius:1mm}
+.clm .hd{display:block}
+.clm .hd .vd{margin-top:.5mm}
+.route.r5{grid-template-columns:repeat(5,1fr)}
 .mcrow{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
 .mcrow.n3{grid-template-columns:1fr 1fr 1fr}
 .mcrow.n3 .mc{font-size:10.8pt}
@@ -160,7 +198,7 @@ body += f'<section class="part"><h1>מילון מושגים</h1><div class="glc"
 body += '<section class="part"><h1>במפגש הבא: נכסים שוטפים</h1><p>' + TX('לקוחות, מלאי והשקעות למסחר: שלושה נכסים שוטפים, מהותם והשפעתם על הדיווח.') + '</p></section>'
 cover = (f'<div class="cover"><div class="c-top">{COURSE} · האוניברסיטה הפתוחה · {TX("קורס 13002 · מפגש 1")}</div><div class="c-title">מבוא לחשבונאות ודיווח כספי</div>'
          '<div class="c-sub">סיכום מלא של השיעור: תפקיד החשבונאות הפיננסית, הדוחות הכספיים, בסיס הצבירה והזהות החשבונאית.</div><div class="c-line"></div>'
-         '<div class="c-meta">' + TX('20 שאלות תרגול עם פתרונות מלאים, דוחות כספיים במספרים, ומילון מושגים.') + '<br>סמסטר <span dir="ltr">2026</span>ג</div>'
+         '<div class="c-meta">' + TX('20 שאלות תרגול, שאלות הכנה ותרגול עצמי, עם פתרונות מלאים, דוחות כספיים במספרים ומילון מושגים.') + '<br>סמסטר <span dir="ltr">2026</span>ג</div>'
          '<div class="c-author"><div class="c-name">מרכז ההוראה: ד״ר שי צבאן</div><div class="c-mail" dir="ltr">Shay.tsaban@gmail.com</div></div></div>')
 toc = '<div class="toc"><h1>תוכן העניינים</h1><ol>' + ''.join(f'<li>{parts[n][0]["h"]}</li>' for n in range(1, TOTAL_PARTS + 1)) + '</ol></div>'
 page = f'<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>{COURSE} | שיעור 1 | סיכום</title><style>{CSS}</style></head><body>{cover}{toc}{body}</body></html>'
@@ -173,6 +211,7 @@ p = os.path.join(d, 'summary.html')
 open(p, 'w', encoding='utf8').write(page)
 out = os.path.abspath(os.path.join(H, '..', 'lectures', 'lecture-1', 'summary.pdf'))
 subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--no-sandbox', f'--user-data-dir={d}/p', '--no-pdf-header-footer', '--virtual-time-budget=8000', f'--print-to-pdf={out}', 'file://' + p], capture_output=True, timeout=180)
+shutil.rmtree(d, ignore_errors=True)
 import fitz
 doc = fitz.open(out)
 txt = ''.join(pg.get_text() for pg in doc)
