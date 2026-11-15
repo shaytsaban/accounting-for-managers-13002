@@ -264,7 +264,9 @@ def PQ(key, title, stem, claims, opts, a, why, sols, ans, ask=Q_ASK, name='שא�
     head = f'{full}: {title}'
     k = f'חלק {CUR[0]} · {full}'
     one = not claims and len(stem) == 1
-    stem_h = '' if one else ''.join(f'<p>{TX(x)}</p>' for x in stem)
+    _ql = globals().get('_qlines')   # lessons with the sheet kit: one data item per line
+    # the data, one item per line; the question sentence itself (the last paragraph, ending with ?) stays one bold line
+    stem_h = '' if one else ''.join((f'<p class="qq">{TX(x)}</p>' if (j == len(stem) - 1 and x.rstrip().endswith('?')) or x.startswith('לפניכם') else f'<div class="ql">{_ql(x)}</div>') if _ql else f'<p>{TX(x)}</p>' for j, x in enumerate(stem))
     claim_h = ''.join(f'<p><b>טענה {i + 1}:</b> {TX(c)}</p>' for i, c in enumerate(claims or []))
     qtext = stem[0] if one else ask
     q_mc = mc(f'pq-{sid}', qtext, opts, a, why)
@@ -277,10 +279,12 @@ def PQ(key, title, stem, claims, opts, a, why, sols, ans, ask=Q_ASK, name='שא�
         return
     card = f'<div class="card qstem{" sm" if sm else ""}">{stem_h}{claim_h}</div>' if stem_h or claim_h else ''
     static = '<div class="sopts">' + f'<div class="q">{TX(qtext)}</div>' + ''.join(f'<p>{"אבגדה"[i]}. {TX(t)}</p>' for i, t in enumerate(opts)) + '</div>'
+    longq = bool(globals().get('_qlines')) and sum(len(x) for x in stem) + sum(len(c) for c in (claims or [])) > 420
+    budget = 170 if longq else 470   # the options take the top of the solution column
     chunks, cur, used = [], [], 0
     for e in flat:
         h = _est(e)
-        if cur and used + h > 470: chunks.append(cur); cur, used = [], 0
+        if cur and used + h > budget: chunks.append(cur); cur, used = [], 0
         cur.append(e); used += h
     chunks.append(cur)
     for i, ch in enumerate(chunks):
@@ -292,7 +296,12 @@ def PQ(key, title, stem, claims, opts, a, why, sols, ans, ask=Q_ASK, name='שא�
         if last:
             h += ST(len(ch) + 1, f'<b>תשובה:</b> {TX(ans)}', cls='band ans') + (PUN(pun, len(ch) + 2) if pun else '')
         qchars = sum(len(x) for x in stem) + sum(len(c) for c in (claims or [])) + sum(len(o) for o in opts)
-        body = f'<div class="pq2"><div class="pqq{" lg" if qchars < 300 and not claims else ""}">{card}{q_mc if i == 0 else static}</div><div class="pqa">{h}</div></div>'
+        opts_h = q_mc if i == 0 else static
+        if longq:
+            # a long question: the options open the left column, so the question keeps its full height
+            body = f'<div class="pq2"><div class="pqq">{card}</div><div class="pqa">{opts_h}{h}</div></div>'
+        else:
+            body = f'<div class="pq2"><div class="pqq{" lg" if qchars < 300 and not claims else ""}">{card}{opts_h}</div><div class="pqa">{h}</div></div>'
         tag = '' if len(chunks) == 1 else f' ({i + 1} מתוך {len(chunks)})'
         S(sid + ('' if not i else f'c{i + 1}'), head + tag, head + tag, body, kick=k, cls='qslide')
 

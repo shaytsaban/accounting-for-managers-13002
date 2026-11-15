@@ -50,7 +50,7 @@ def _orders(rows, arrows):
     return raws
 
 
-def TBL(cols, rows, arrows=(), n0=1, widths=None, dcol=None, center=False, sid='t'):
+def TBL(cols, rows, arrows=(), n0=1, widths=None, dcol=None, center=False, sid='t', order=None):
     """One clean table. Returns (html, next reveal number, notes for the summary, first reveal number).
     dcol: index of a date column (centred, left to right). center: figures centred (year tables)."""
     rn = {row['k']: i + 2 for i, row in enumerate(rows)}
@@ -62,8 +62,9 @@ def TBL(cols, rows, arrows=(), n0=1, widths=None, dcol=None, center=False, sid='
             t = _num(c['v'] if isinstance(c, dict) else c)
             if t is not None: wid[i] = max(wid.get(i, 0), len(t) + (0 if t.startswith('(') else 1))
     raws = _orders(rows, arrows)
-    order = {o: n0 + i for i, o in enumerate(sorted(set(raws)))}
-    nend = n0 + len(order)
+    if order is None:
+        order = {o: n0 + i for i, o in enumerate(sorted(set(raws)))}
+    nend = max(order.values()) + 1 if order else n0
     notes = []
     rev = MODE == 'deck'
     stp = lambda o: f' data-n="{order[o] * 10}"'
@@ -115,7 +116,7 @@ def TBL(cols, rows, arrows=(), n0=1, widths=None, dcol=None, center=False, sid='
         if rev:
             arr += f'<div class="sga st auto"{stp(a["o"])} data-from="{fr}" data-to="{to}"><div class="xx">{TX(a["x"])}</div></div>'
     cg = '<colgroup>' + ''.join(f'<col style="width:{w}%">' for w in widths) + '</colgroup>' if widths else ''
-    first = min(order.values())
+    first = min(order[o] for o in raws) if raws else n0
     return f'<div class="sgs"><table class="sg{" ctr" if center else ""}">{cg}{head}{body}</table>{arr}</div>', nend, notes, first
 
 
@@ -127,16 +128,22 @@ def STG(num, title, cols, rows, arrows=(), widths=None, dcol=None, center=False,
 _SG = [0]
 
 
-def SOL(stages, n0=1, flow=None, after=(), layout='', tip=None, side_panel=False, parts=False):
+def SOL(stages, n0=1, flow=None, after=(), layout='', tip=None, side_panel=False, parts=False, joint=False):
     """The solution column: the flowchart strip, a card per stage, and the explanation panel. Returns (html, next n).
     flow: the names of the topic's steps; the steps of these stages are marked. layout: '' stacked, 'two' side by side."""
     n, cards, allnotes = n0, '', []
+    jo = None
+    if joint:
+        allr = sorted(set(o for sg in stages if not sg.get('fn') for o in _orders(sg['rows'], sg['arrows'])))
+        jo = {o: n0 + i for i, o in enumerate(allr)}
     for sg in stages:
         _SG[0] += 1
         if sg.get('fn'):
             h, n2, notes = sg['fn'](n); first = n
         else:
-            h, n2, notes, first = TBL(sg['cols'], sg['rows'], sg['arrows'], n, sg['widths'], sg['dcol'], sg['center'], sid=f'g{_SG[0]}')
+            h, n2, notes, first = TBL(sg['cols'], sg['rows'], sg['arrows'], n, sg['widths'], sg['dcol'], sg['center'], sid=f'g{_SG[0]}', order=jo)
+            if sg.get('tcls'): h = h.replace('<table class="sg', f'<table class="sg {sg["tcls"]}', 1)
+            if jo: n2 = max(jo.values()) + 1
         lab = f'<span class="sgn">{"שלב " + str(sg["num"]) if isinstance(sg["num"], int) else sg["num"]}</span>' if sg['num'] else ''
         card = f'<div class="sgc"><div class="sgt">{lab}<label>{TX(sg["t"])}</label></div>{h}'
         if MODE == 'pdf' and notes:
@@ -190,11 +197,33 @@ def _xs_plain(cols, rows, arrows, n, widths, dcol, center):
 KIND = {'together': 'מסבירים יחד', 'alone': 'נסו לבד', 'class': 'פתרנו בשיעור', 'excel': 'עכשיו אתם, באקסל', 'sol': 'הפתרון, שלב אחר שלב'}
 
 
+def _qlines(p):
+    """A story paragraph, one data item per line: numbered items split at (1), (2)..., otherwise one sentence per line."""
+    if re.search(r'\(\d+\)', p):
+        parts = [s.strip() for s in re.split(r'\s*(?=\(\d+\))', p) if s.strip()]
+    else:
+        parts, cur = [], ''
+        for tok in re.split(r'(?<=[.?!])\s+', p):
+            cur = (cur + ' ' + tok).strip() if cur else tok
+            last = re.sub(r'<[^>]+>', '', cur).rstrip('.?!:').split()[-1:] or ['']
+            # a single-letter initial (צחי פ.) or a number does not end a sentence
+            if len(last[0]) > 1 and not re.match(r'^[\d(]', tok.lstrip()[:1] or 'x') or tok.endswith(('?', '!')):
+                parts.append(cur); cur = ''
+        if cur: parts.append(cur)
+    out = ''
+    for s in parts:
+        m = re.match(r'\((\d+)\)\s*(.*)', s, re.S)
+        if m: out += f'<p class="qi qn"><b class="qno"><span class="n">{m.group(1)}</span></b>{TX(m.group(2))}</p>'
+        elif re.fullmatch(r'<b>[^<]*</b>:?', s): out += f'<p class="qh">{TX(s)}</p>'
+        else: out += f'<p class="qi">{TX(s)}</p>'
+    return out
+
+
 def QCARD(kind, story, asks, cur=None, data='', wide=False):
     """wide: a question above a wide table; the data table sits beside the story, so the solution gets the height."""
     lab = KIND[kind]
     ah = ''.join(f'<p class="{"cur" if cur and l in cur else ""}"><b>{l}.</b> {TX(t)}</p>' if l else f'<p class="{"cur" if cur else ""}">{TX(t)}</p>' for l, t in asks)
-    st = ''.join(f'<p>{TX(p)}</p>' for p in story)
+    st = '<div class="ql">' + ''.join(_qlines(p) for p in story) + '</div>'
     if wide and data:
         return (f'<div class="card qstem xq sm qw"><div class="qa"><span class="kd {kind}">{lab}</span>{st}<div class="asks"><b>נדרש:</b>{ah}</div></div><div class="qd">{data}</div></div>')
     return (f'<div class="card qstem xq sm"><span class="kd {kind}">{lab}</span>' + st + data
@@ -211,7 +240,7 @@ def XQ(key, title, kind, story, asks, slides, data='', stack=False, flow=None, l
     if MODE == 'pdf':
         b = QCARD(kind, story, asks, None, data)
         for sl in slides:
-            b += SOL(sl['stages'], 1, None, sl.get('after', ()))[0]
+            b += SOL(sl['stages'], 1, None, sl.get('after', ()), joint=sl.get('joint', False))[0]
         S(sid, f'{lab}: {title}', f'{lab}: {title}', b, kind='q')
         return
     lives = live if isinstance(live, list) else ([live] if live else [])
@@ -221,7 +250,7 @@ def XQ(key, title, kind, story, asks, slides, data='', stack=False, flow=None, l
     for i, sl in enumerate(slides):
         # stacked: the tip becomes the first text of the explanation panel beside the question
         tipx = ' '.join(t for kd, t in sl.get('after', ())) if stack else None
-        h, pan, aft = SOL(sl['stages'], 1, flow, () if stack else sl.get('after', ()), sl.get('layout', ''), parts=True,
+        h, pan, aft = SOL(sl['stages'], 1, flow, () if stack else sl.get('after', ()), sl.get('layout', ''), parts=True, joint=sl.get('joint', False),
                           tip=('<b>טיפ:</b> ' + tipx + ' ' + 'לחצו על מספר מסומן: כאן יופיע החישוב שלו.') if tipx else None)
         tag = '' if len(slides) == 1 else f' ({i + 1} מתוך {len(slides)})'
         kd = 'sol' if kind == 'alone' else kind
@@ -240,10 +269,10 @@ def XQ(key, title, kind, story, asks, slides, data='', stack=False, flow=None, l
 
 
 # ---------------------------------------------------------------- live Excel practice
-def LR(k, cells, note='', kind=''):
+def LR(k, cells, note='', kind='', ord=None, ords=None, notes=None):
     """A row of a live sheet. cells: column A first. A number is typed by the student (a figure of the question);
     a formula '=...' or ('=...', expected value) is written by the student; any other text is a fixed label. kind 'h': a title row."""
-    return dict(k=k, c=cells, note=note, kind=kind)
+    return dict(k=k, c=cells, note=note, kind=kind, ord=ord, ords=ords or {}, notes=notes or {})
 
 
 class P(float):
@@ -258,7 +287,8 @@ def LIVE(cols, rows, widths, hints=None, remind=None, fmt='acc0', center=(), don
     for i, c in enumerate(cols):
         data[f'{LET[i]}1'] = f'שנת {c}' if re.fullmatch(r'\d{4}', str(c)) else c   # a bare year would be read as a number
         sty[f'{LET[i]}1'] = dict(b=True, al='center', fill='#1d6f42')
-    for r in rows:
+    groups = []
+    for ri, r in enumerate(rows):
         n = rn[r['k']]
         cells = {}
         for i, c in enumerate(r['c']):
@@ -286,9 +316,17 @@ def LIVE(cols, rows, widths, hints=None, remind=None, fmt='acc0', center=(), don
             for i in range(len(cols)):
                 sty.setdefault(f'{LET[i]}{n}', {})['b'] = True
         if cells:
-            note = r['note'] or ('מקלידים את נתוני השאלה בשורה הזו.' if all(not str(v).startswith('=') for v in cells.values()) else '')
-            first = next((a for a in cells if str(cells[a]).startswith('=')), next(iter(cells)))
-            steps.append(dict(cells=cells, note=TX(note), sel=first))
+            base = r['ord'] if r.get('ord') is not None else (ri + 1) * 10
+            own = {a: v for a, v in cells.items() if a[0] not in r['ords']}
+            if own:
+                note = r['note'] or ('מקלידים את נתוני השאלה בשורה הזו.' if all(not str(v).startswith('=') for v in own.values()) else '')
+                groups.append((base, own, note))
+            for col, o in r['ords'].items():
+                one = {a: v for a, v in cells.items() if a[0] == col}
+                if one: groups.append((o, one, r['notes'].get(col, '')))
+    for o, cells, note in sorted(groups, key=lambda g: g[0]):
+        first = next((a for a in cells if str(cells[a]).startswith('=')), next(iter(cells)))
+        steps.append(dict(cells=cells, note=TX(note), sel=first))
     vals, _ = _fin.evaluate({**data, **sol})
     for a, want in expect.items():
         got = vals[a]
