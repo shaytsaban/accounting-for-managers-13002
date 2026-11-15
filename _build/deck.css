@@ -325,11 +325,11 @@ svg .st:not(.show){opacity:0}
 .toon .tc{font-size:21px;font-weight:800;color:#b8391f;line-height:1.25;margin-top:4px}
 .toonr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,.7fr);gap:16px;align-items:start}
 .pita{display:block;width:100%;border-radius:10px}
-.pq2{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:14px;align-items:start}
+.pq2,.x2{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:14px;align-items:start}
 .pqq{display:flex;flex-direction:column;gap:8px;min-width:0}
 .pqq .qstem{padding:10px 14px}
 .pqq .qstem p{font-size:20px;line-height:1.33;margin:0 0 5px}
-.pqq .qstem.sm p{font-size:18px;line-height:1.28;margin:0 0 3px}
+.pqq .qstem.sm p{font-size:17.5px;line-height:1.26;margin:0 0 3px}
 .pqq .mc{padding:8px 12px}
 .pqq .mc .q{font-size:20px;line-height:1.3}
 .pqq .mc .o{font-size:19px;padding:4px 10px;margin-top:4px;line-height:1.25}
@@ -370,3 +370,55 @@ svg .st:not(.show){opacity:0}
 .txsu .sa{margin:0 6px}
 .txchk{white-space:nowrap}
 @media print{.qm{display:none!important}}
+
+/* ===== lesson 2: written calculations, answer boxes, exercises beside their solution ===== */
+.cl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;background:#fff;border-radius:10px;padding:6px 12px;margin:5px 0;box-shadow:0 1px 0 var(--line);font-size:21px}
+.cl .cll{font-weight:700;color:var(--navy2);flex:1 1 auto;min-width:0}
+.cl .m{font-size:22px;color:#16213a}
+.cl small{flex-basis:100%;font-size:17.5px;color:var(--mut);line-height:1.25}
+.card .cl,.pqa .cl{box-shadow:none;background:#f6f8fc}
+.xb{background:#fff;border-radius:14px;padding:7px 12px 8px;box-shadow:0 2px 0 var(--line);margin-bottom:8px}
+.xh{font-size:20px;font-weight:800;color:var(--coral);margin-bottom:2px}
+.xb p{font-size:20px;line-height:1.35;margin:4px 0}
+.xq{position:relative}
+.kd{display:inline-block;font-size:16.5px;font-weight:800;border-radius:999px;padding:2px 12px;margin-bottom:6px}
+.kd.together{background:var(--incbg);color:#167a43}.kd.alone{background:#fff0d2;color:#8a5300}
+.asks{margin-top:6px;padding-top:6px;border-top:2px dashed var(--line)}
+.asks>b{display:block;font-size:19px;color:var(--coral)}
+.pqq .qstem .asks p{font-weight:700}
+.chkw{background:#fff7e0;border-radius:14px;padding:8px 12px;margin-bottom:8px;border-right:6px solid #f0b429}
+.chkh{font-size:19px;font-weight:800;color:#8a5300;margin-bottom:4px}
+.ansb{display:grid;grid-template-columns:minmax(0,1fr) 150px auto 120px;gap:8px;align-items:center;margin:4px 0;font-size:19px;font-weight:700;color:var(--navy2)}
+.ansb input{font:600 19px/1.2 'Heebo','Segoe UI',Arial,sans-serif;padding:5px 8px;border:2px solid var(--line);border-radius:8px;width:100%;text-align:left}
+.ansb button{font:800 17px/1 'Heebo','Segoe UI',Arial,sans-serif;background:var(--navy2);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.ansb em{font-style:normal;font-size:16.5px;font-weight:800}
+.ansb.ok input{border-color:#25a65f;background:#e3f6ea}.ans.ok em{color:#167a43}
+.ansb.bad input{border-color:#e0454f;background:#fde8ea}.ans.bad em{color:#b3262f}
+.dt{width:100%;table-layout:fixed;border-collapse:collapse;margin:6px 0;font-size:18px;background:#fff;border-radius:8px;overflow:hidden}
+.dt th{background:var(--navy2);color:#fff;padding:4px 6px;font-weight:700;text-align:center}
+.dt td{padding:3px 6px;border-bottom:1px solid var(--line);text-align:center}
+.dt.big{font-size:21px}.dt.big td,.dt.big th{padding:7px 10px}
+.dt.sm{font-size:16.5px;margin:3px 0}.dt.sm td{padding:0 5px;line-height:1.3}.dt.sm th{padding:2px 5px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tri{display:flex;flex-direction:column;gap:8px;font-size:21px;line-height:1.35;border-top:7px solid}
+.tri b{font-size:27px;color:var(--navy2)}
+.tri .big{font-size:24px;font-weight:800}
+.tri.a{border-color:var(--asset)}.tri.b{border-color:var(--eq)}.tri.c{border-color:var(--liab)}
+.rcp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
+.rcp .card{display:flex;flex-direction:column;gap:6px;font-size:20px;line-height:1.35}
+.rcp .card b{font-size:22px;color:var(--navy2)}
+.yrs{display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);gap:12px;align-items:center;margin:8px 0}
+.yr{display:flex;flex-direction:column;gap:6px;font-size:20px;line-height:1.35}
+.yr b{font-size:22px;color:var(--navy2)}.yr em{font-style:normal;font-weight:800;font-size:21px}
+.yr.a{border-top:7px solid var(--inc)}.yr.b{border-top:7px solid var(--exp)}
+.ymid{text-align:center;font-size:18px;font-weight:700;color:var(--mut);line-height:1.3}
+.yarr{font-size:44px;color:var(--coral);line-height:1}
+.route.r7{grid-template-columns:repeat(7,1fr)}
+.route.r7 .rcard{min-height:250px}
+table.map{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:18.5px}
+.map th{background:var(--navy2);color:#fff;padding:6px 10px;text-align:right}
+.map td{padding:4px 10px;border-bottom:1px solid var(--line);line-height:1.25}
+.map td.qn{font-size:22px;font-weight:800;color:var(--coral);text-align:center;width:60px}
+.lnk{display:inline-block;margin:2px 3px;padding:2px 10px;border-radius:999px;border:2px solid var(--line);background:#f6f8fc;font:700 16.5px/1.3 'Heebo','Segoe UI',Arial,sans-serif;color:var(--navy2);cursor:pointer}
+.lnk:hover{border-color:var(--coral)}
+.ansp{font-weight:700}

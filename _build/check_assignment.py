@@ -17,7 +17,7 @@ for ln in raw.split('\n'):
     if re.search(r'^[.?:]|[.?:]$', ln) or re.match(r'^[א-ה]\. ', ln):
         t = norm(buf); buf = ''
         if len(t) > 30: items.append(t)
-deck = open(os.path.join(H, '..', 'lectures', 'lecture-1', 'presentation.html'), encoding='utf8').read()
+deck = open(os.path.join(H, '..', 'lectures', f"lecture-{os.environ.get('LESSON', '1')}", 'presentation.html'), encoding='utf8').read()
 blocks = {m.group(1): m.group(0) for m in re.finditer(r'<section class="slide[^"]*" id="([^"]+)".*?</section>', deck, re.S)}
 sents = []
 for sid, b in blocks.items():

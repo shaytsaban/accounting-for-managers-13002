@@ -4,7 +4,9 @@ H = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, H)
 R = lambda f: open(os.path.join(H, f), encoding='utf8').read()
 MODE = 'pdf'
-for f in ('content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'):
+LESSON = int(os.environ.get('LESSON', '1'))
+FILES = {1: ('frame.py', 'content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'), 2: ('frame.py', 'l2_a.py', 'l2_b.py', 'l2_c.py')}
+for f in FILES[LESSON]:
     exec(R(f))
 FONTS = os.path.join(H, '..', '..', 'iit-build', 'fonts')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -181,6 +183,31 @@ tr{break-inside:avoid}
 .gl .th{font-weight:700;color:var(--navy);font-size:11.4pt}
 .gl small{font-weight:400;color:var(--mut);direction:ltr;unicode-bidi:isolate;margin-right:1.5mm;font-size:9.6pt}
 .gl p{margin:0 0 .3mm}
+
+.cl{display:flex;gap:3mm;align-items:baseline;flex-wrap:wrap;border-bottom:.2mm dotted var(--line);padding:.4mm 0}
+.cl .cll{font-weight:700;color:var(--navy);flex:1 1 auto}
+.cl small{flex-basis:100%;color:var(--mut);font-size:9.8pt}
+.xb{border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm 2mm;margin:1mm 0;break-inside:avoid}
+.xh{font-weight:700;color:#c4421f}
+.xb p{margin:.4mm 0}
+.kd{display:inline-block;font-weight:700;font-size:9.8pt;border-radius:2mm;padding:0 2mm;background:#f1ece0}
+.asks{margin-top:1mm}.asks>b{color:#c4421f}
+.ansp{display:inline-block;margin:0 0 1mm 4mm;background:#fff7e0;border-radius:1mm;padding:.3mm 2mm}
+table.dt{width:100%;border-collapse:collapse;font-size:10.4pt;margin:1mm 0}
+.dt th{background:var(--navy);color:#fff;padding:.4mm 1.5mm}.dt td{padding:.3mm 1.5mm;border-bottom:.2mm solid var(--line);text-align:center}
+.trio,.rcp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2mm}
+.tri,.rcp .card{display:flex;flex-direction:column;gap:.6mm}
+.tri b,.rcp b{color:var(--navy)}
+.yrs{display:grid;grid-template-columns:1fr 26mm 1fr;gap:2mm;align-items:center}
+.yr{display:flex;flex-direction:column}.yr em{font-style:normal;font-weight:700}
+.ymid{text-align:center;color:var(--mut)}.yarr{font-size:16pt;color:#c4421f}
+table.map{width:100%;border-collapse:collapse;font-size:10.4pt}
+.map th{background:var(--navy);color:#fff;padding:.5mm 2mm;text-align:right}.map td{padding:.5mm 2mm;border-bottom:.2mm solid var(--line)}
+.lnk{display:inline-block;border:.2mm solid var(--line);border-radius:2mm;padding:0 1.5mm;margin:.3mm}
+.ill{display:block;width:100%;height:auto;direction:ltr;unicode-bidi:isolate;font-family:"David"}
+.illw{margin:1mm 0;break-inside:avoid}
+.ident{display:flex;direction:ltr;gap:2mm;align-items:stretch}.ibox{flex:1;border-radius:1.4mm;padding:1mm;text-align:center;direction:rtl}.ibox small{display:block}.iop{align-self:center;font-weight:700}
+.chkw,.chkh{display:none}
 '''
 parts = {}
 for s in SL:
@@ -200,13 +227,13 @@ for n in range(1, TOTAL_PARTS + 1):
     body += f'<section class="part"><h1><span class="sn">{n}</span>{op["h"]}</h1>{inner}</section>'
 gl = ''.join(f'<div class="gl"><div class="th">{g["h"]}<small>{g["en"]}</small></div><p><b>בפשטות:</b> {g["p"]}</p><p><b>בלשון מקצועית:</b> {g["f"]}</p><p><b>דוגמה:</b> {g["ex"]}</p><p><b>שימו לב:</b> {g["tr"]}</p></div>' for g in G.values())
 body += f'<section class="part"><h1>מילון מושגים</h1><div class="glc">{gl}</div></section>'
-body += '<section class="part"><h1>במפגש הבא: נכסים שוטפים</h1><p>' + TX('לקוחות, מלאי והשקעות למסחר: שלושה נכסים שוטפים, מהותם והשפעתם על הדיווח.') + '</p></section>'
-cover = (f'<div class="cover"><div class="c-top">{COURSE} · האוניברסיטה הפתוחה · {TX("קורס 13002 · מפגש 1")}</div><div class="c-title">מבוא לחשבונאות ודיווח כספי</div>'
-         '<div class="c-sub">סיכום מלא של השיעור: תפקיד החשבונאות הפיננסית, הדוחות הכספיים, בסיס הצבירה והזהות החשבונאית.</div><div class="c-line"></div>'
-         '<div class="c-meta">' + TX('20 שאלות תרגול, שאלות הכנה ותרגול עצמי, עם פתרונות מלאים, דוחות כספיים במספרים ומילון מושגים.') + '<br>סמסטר <span dir="ltr">2027</span>א</div>'
+body += f'<section class="part"><h1>{META["next_hp"]}</h1><p>' + TX(META['next_p']) + '</p></section>'
+cover = (f'<div class="cover"><div class="c-top">{COURSE} · האוניברסיטה הפתוחה · {TX(f"קורס 13002 · מפגש {LESSON}")}</div><div class="c-title">{META["title"]}</div>'
+         f'<div class="c-sub">{META["cover_sub"]}</div><div class="c-line"></div>'
+         '<div class="c-meta">' + TX(META['cover_meta']) + '<br>סמסטר <span dir="ltr">2027</span>א</div>'
          '<div class="c-author"><div class="c-name">מרכז ההוראה: ד״ר שי צבאן</div><div class="c-mail" dir="ltr">Shay.tsaban@gmail.com</div></div></div>')
 toc = '<div class="toc"><h1>תוכן העניינים</h1><ol>' + ''.join(f'<li>{parts[n][0]["h"]}</li>' for n in range(1, TOTAL_PARTS + 1)) + '</ol></div>'
-page = f'<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>{COURSE} | שיעור 1 | סיכום</title><style>{CSS}</style></head><body>{cover}{toc}{body}</body></html>'
+page = f'<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>{COURSE} | שיעור {LESSON} | סיכום</title><style>{CSS}</style></head><body>{cover}{toc}{body}</body></html>'
 for bad in ('—', '־'):
     assert bad not in page, bad
 d = tempfile.mkdtemp(dir=os.environ.get('TMPDIR'))
@@ -214,7 +241,7 @@ for f in ('david.ttf', 'davidbd.ttf'):
     shutil.copy(os.path.join(FONTS, f), d)
 p = os.path.join(d, 'summary.html')
 open(p, 'w', encoding='utf8').write(page)
-out = os.path.abspath(os.path.join(H, '..', 'lectures', 'lecture-1', 'summary.pdf'))
+out = os.path.abspath(os.path.join(H, '..', 'lectures', f'lecture-{LESSON}', 'summary.pdf'))
 subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--no-sandbox', f'--user-data-dir={d}/p', '--no-pdf-header-footer', '--virtual-time-budget=8000', f'--print-to-pdf={out}', 'file://' + p], capture_output=True, timeout=180)
 shutil.rmtree(d, ignore_errors=True)
 import fitz

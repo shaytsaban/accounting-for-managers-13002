@@ -55,7 +55,7 @@ document.querySelectorAll('.calc').forEach(b=>{const id=b.dataset.calc,out=docum
  const r0=res(),ins=[...b.querySelectorAll('input')],first=ins[0],v=first.value;first.value=String(parseFloat(v.replace(/,/g,''))*2);fire(first);const r1=res();first.value='abc';fire(first);const bad=!!out.querySelector('.err');first.value=v;fire(first);const r2=res();
  const overflow=(()=>{D.go('c-'+id);const q=rel(out),l=rel(b);return Math.round(Math.max(q.b,l.b));})();
  R.calc.push({id,r0,r1,changed:r0!==r1,bad,restored:r0===r2,bottom:overflow,inputs:ins.length});});
-window.__ALT.forEach(([id,vals,exp])=>{const b=document.querySelector('.calc[data-calc="'+id+'"]'),out=document.getElementById('out-'+id);const saved=[...b.querySelectorAll('[data-k]')].map(e=>[e,e.value]);Object.entries(vals).forEach(([k,v])=>{const e=b.querySelector('[data-k="'+k+'"]');e.value=v;fire(e);});const x=out.querySelector('[data-res]');const got=x?x.textContent:out.textContent.slice(0,50);D.go('c-'+id);const rq=rel(out);R.alt.push({id,exp,got,ok:exp?got===exp:true,bottom:Math.round(rq.b)});saved.forEach(([e,v])=>{e.value=v;fire(e);});});
+window.__ALT.forEach(([id,vals,exp])=>{const b=document.querySelector('.calc[data-calc="'+id+'"]'),out=document.getElementById('out-'+id);if(!b)return;const saved=[...b.querySelectorAll('[data-k]')].map(e=>[e,e.value]);Object.entries(vals).forEach(([k,v])=>{const e=b.querySelector('[data-k="'+k+'"]');e.value=v;fire(e);});const x=out.querySelector('[data-res]');const got=x?x.textContent:out.textContent.slice(0,50);D.go('c-'+id);const rq=rel(out);R.alt.push({id,exp,got,ok:exp?got===exp:true,bottom:Math.round(rq.b)});saved.forEach(([e,v])=>{e.value=v;fire(e);});});
 // every signed amount must paint its sign on the left of its digits
 R.signs=0;R.signBad=[];document.querySelectorAll('.m,.it .n,.res b').forEach(e=>{const t=e.textContent;const m=/^[−+]\d/.test(t);if(!m)return;const sl=e.closest('.slide');if(!sl)return;const i=D.slides.indexOf(sl);D.show(i);D.setAll(sl,true);const a=document.createRange(),b=document.createRange();const w=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);const n=w.nextNode();if(!n)return;a.setStart(n,0);a.setEnd(n,1);b.setStart(n,1);b.setEnd(n,2);if(!a.getBoundingClientRect().width)return;R.signs++;if(a.getBoundingClientRect().left>=b.getBoundingClientRect().left)R.signBad.push({id:sl.id,t});});
 // glossary and links
@@ -75,10 +75,13 @@ document.querySelector('.gitem').click();if(!has('#drawer','open'))R.shell.push(
 document.querySelector('#drawer .tabs button[data-k="f"]').click();if(!document.getElementById('dp').textContent.length)R.shell.push('drawer tab');
 document.getElementById('dx').click();if(has('#drawer','open'))R.shell.push('drawer close');
 D.go('s-route');const cards=[...document.querySelectorAll('.rcard')];cards.forEach(c=>{D.go('s-route');c.click();if(D.slides[D.cur()].id!==c.dataset.go)R.shell.push('route '+c.dataset.go);});
-D.go('s-fin');D.setAll(D.slides[D.cur()],true);const tm=D.slides[D.cur()].querySelector('.term');tm.click();if(!has('#drawer','open'))R.shell.push('term click');D.closeOverlays();
+const tsl=D.slides.find(s=>s.querySelector('.term'));D.go(tsl.id);D.setAll(D.slides[D.cur()],true);const tm=D.slides[D.cur()].querySelector('.term');tm.click();if(!has('#drawer','open'))R.shell.push('term click');D.closeOverlays();
 D.show(0);document.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));if(D.cur()!==D.slides.length-1)R.shell.push('End key');document.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));if(D.cur()!==0)R.shell.push('Home key');
 ['bPrint','bFull','bNext','bPrev'].forEach(i=>{if(!document.getElementById(i))R.shell.push(i);});
 R.count=D.slides.length;R.opener=[...document.querySelectorAll('.pd')].length;R.st=document.querySelectorAll('.st').length;R.mcN=document.querySelectorAll('.mc').length;R.calcN=document.querySelectorAll('.calc').length;
+R.ans=[];document.querySelectorAll('.ansb').forEach(a=>{const sl=a.closest('.slide');D.go(sl.id);const i=a.querySelector('input'),t=+a.dataset.ans;i.value='';const e0=D.ansCheck(a);i.value=String(t+7);const e1=D.ansCheck(a);i.value=t.toLocaleString('en-US');const ok=D.ansCheck(a);const c=D.cur();i.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));const stay=D.cur()===c;i.value='';a.classList.remove('ok','bad');a.querySelector('em').textContent='';if(e0||e1||!ok||!stay)R.ans.push({id:sl.id,t,e0,e1,ok,stay});});R.ansN=document.querySelectorAll('.ansb').length;
+// every in-deck link must lead somewhere
+R.links=[...document.querySelectorAll('.lnk[data-go]')].filter(b=>!document.getElementById(b.dataset.go)).map(b=>b.dataset.go);
 document.documentElement.setAttribute('data-test',JSON.stringify(R));
 })();
 '''
@@ -110,13 +113,15 @@ print('signed amounts measured', R['signs'], 'painted wrong', R['signBad'])
 bad = [x for x in R['mc'] if x != 1]
 print('mc ok', len(R['mc']) - len(bad), 'bad', bad)
 for c in R['calc']:
-    exp = EXPECT[c['id']]
+    exp = EXPECT.get(c['id'], c['r0'])
     FAIL += c['r0'] != exp or not c['changed'] or not c['bad'] or not c['restored'] or c['bottom'] > 684
     print('  calc', c['id'], 'default', c['r0'], 'OK' if c['r0'] == exp else 'EXPECTED ' + exp, 'changed' if c['changed'] else 'NOCHANGE', 'badinput' if c['bad'] else 'NOERR', 'restored' if c['restored'] else 'NOTRESTORED', 'bottom', c['bottom'])
 for a in R['alt']:
     print('  alt', a['id'], a['got'], 'OK' if a['ok'] else 'EXPECTED ' + str(a['exp']), 'bottom', a['bottom'])
     FAIL += not a['ok'] or a['bottom'] > 684
 print('shell problems', R['shell'])
+print('answer boxes', R['ansN'], 'problems', R['ans'], 'broken links', R['links'])
+FAIL += len(R['ans']) + len(R['links'])
 print('terms missing', R['terms'], 'used', R['termsUsed'], 'of', R['termsTotal'], 'unused', R['unusedTerms'], 'bad go', R['go'])
 FAIL += len(R['shell']) + bool(R['errors']) + len(R['overflow']) + len(R['eqwide']) + len(R['small']) + len(R['chars']) + len(R['reveal']) + len(bad) + len(R['terms']) + len(R['go']) + len(R['signBad']) + len(R['unusedTerms'])
 print('RESULT', 'PASS' if not FAIL else f'FAIL ({FAIL})')

@@ -14,6 +14,10 @@ function setAll(s,on){$$('.st',s).forEach(e=>e.classList.toggle('show',on));}
 $$('.mc').forEach(m=>{const a=+m.dataset.a;m.addEventListener('click',e=>{const o=e.target.closest('.o');if(!o||m.classList.contains('done'))return;const i=+o.dataset.i;m.classList.add('done');
  o.classList.add(i===a?'ok':'bad');if(i!==a)m.querySelectorAll('.o')[a].classList.add('ok');else toast('נכון');});});
 
+/* ---------- answer boxes: type a number, check it ---------- */
+function ansCheck(a){const i=a.querySelector('input'),raw=i.value.trim(),v=parseFloat(raw.replace(/[,\s₪]/g,'').replace('−','-')),t=+a.dataset.ans,ok=!isNaN(v)&&Math.abs(v-t)<=1;a.classList.remove('ok','bad');a.classList.add(ok?'ok':'bad');a.querySelector('em').textContent=raw===''?'הקלידו מספר':ok?'נכון!':'לא מדויק, נסו שוב';return ok;}
+$$('.ansb').forEach(a=>{a.querySelector('button').onclick=e=>{e.stopPropagation();ansCheck(a);};a.querySelector('input').addEventListener('keydown',e=>{if(e.key==='Enter')ansCheck(a);});});
+
 /* ---------- glossary drawer ---------- */
 const gk=Object.keys(G);const dr=$('#drawer');let dkey=null;
 function openTerm(k){const g=G[k];if(!g)return;dkey=k;$('#dh').textContent=g.h;$('#den').textContent=g.en||'';$('#dex').innerHTML='<b>דוגמה: </b>'+g.ex;$('#dtr').innerHTML='<b>שימו לב: </b>'+g.tr;$('#drel').innerHTML='';setMode('p');dr.classList.add('open');closeOverlays(true);}
@@ -54,6 +58,6 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-t]');if(t&
  if(e.target.closest('#stage')&&!e.target.closest('button,a,input,select,label,.mc,.calc,.term')&&!document.getSelection().toString())next();});
 
 /* ---------- footers and boot ---------- */
-slides.forEach((s,i)=>{if(s.id==='s-title'||s.id==='s-end'||s.classList.contains('pd'))return;const f=document.createElement('div');f.className='ft';f.innerHTML='<span>'+COURSE+' · שיעור 1</span><span><b>ד״ר שי צבאן</b> · <span class="n">'+(i+1)+'</span></span>';s.appendChild(f);});
+slides.forEach((s,i)=>{if(s.id==='s-title'||s.id==='s-end'||s.classList.contains('pd'))return;const f=document.createElement('div');f.className='ft';f.innerHTML='<span>'+COURSE+' · שיעור '+LESSON+'</span><span><b>ד״ר שי צבאן</b> · <span class="n">'+(i+1)+'</span></span>';s.appendChild(f);});
 (function(){const h=location.hash.slice(1);const hi=slides.findIndex(s=>s.id===h);show(hi>=0?hi:0);})();
-window.__deck={show,next,prev,go,slides,groups,pending,setAll,openTerm,closeOverlays,cur:()=>cur};
+window.__deck={ansCheck,show,next,prev,go,slides,groups,pending,setAll,openTerm,closeOverlays,cur:()=>cur};
