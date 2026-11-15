@@ -30,7 +30,7 @@ D.slides.forEach((s,i)=>{D.show(i);D.setAll(s,true);
  // equations wider than their container
  s.querySelectorAll('.eq').forEach(e=>{const box=e.closest('.card,.solw,.cout,.fm,td,.slide');const inner=document.createRange();inner.selectNodeContents(e);const a=inner.getBoundingClientRect(),b=box.getBoundingClientRect();if(a.left<b.left-1||a.right>b.right+1)R.eqwide.push({id:s.id,t:e.textContent.slice(0,60),over:Math.round(Math.max(b.left-a.left,a.right-b.right))});});
  // text smaller than the board minimum
- const tw=document.createTreeWalker(s,NodeFilter.SHOW_TEXT);let n;const seen={};while((n=tw.nextNode())){if(!n.nodeValue.trim())continue;const p=n.parentElement;if(p.closest('.ft,sup,sub,tspan'))continue;let fs=parseFloat(getComputedStyle(p).fontSize);const svg=p.closest('svg');if(svg){const vb=svg.viewBox.baseVal.width;fs*=svg.getBoundingClientRect().width/(stage.getBoundingClientRect().width/1280)/vb;if(fs<14.5)seen['svg '+fs.toFixed(1)]=n.nodeValue.slice(0,24);}else if(fs<16.5)seen[fs]=n.nodeValue.slice(0,24);}
+ const tw=document.createTreeWalker(s,NodeFilter.SHOW_TEXT);let n;const seen={};while((n=tw.nextNode())){if(!n.nodeValue.trim())continue;const p=n.parentElement;if(p.closest('.ft,sup,sub,tspan'))continue;if(p.checkVisibility&&!p.checkVisibility())continue;let fs=parseFloat(getComputedStyle(p).fontSize);const svg=p.closest('svg');if(svg){const vb=svg.viewBox.baseVal.width;fs*=svg.getBoundingClientRect().width/(stage.getBoundingClientRect().width/1280)/vb;if(fs<14.5)seen['svg '+fs.toFixed(1)]=n.nodeValue.slice(0,24);}else if(fs<16.5)seen[fs]=n.nodeValue.slice(0,24);}
  if(Object.keys(seen).length)R.small.push({id:s.id,seen});
  // forbidden characters
  const txt=s.textContent;[['em','—'],['maqaf','־'],['en','–'],['ell','…'],['arrow','→'],['arrow2','⇒'],['q1','“'],['q2','”']].forEach(([k,c])=>{if(txt.includes(c))R.chars.push({id:s.id,k});});
@@ -80,6 +80,10 @@ D.show(0);document.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:
 ['bPrint','bFull','bNext','bPrev'].forEach(i=>{if(!document.getElementById(i))R.shell.push(i);});
 R.count=D.slides.length;R.opener=[...document.querySelectorAll('.pd')].length;R.st=document.querySelectorAll('.st').length;R.mcN=document.querySelectorAll('.mc').length;R.calcN=document.querySelectorAll('.calc').length;
 R.ans=[];document.querySelectorAll('.ansb').forEach(a=>{const sl=a.closest('.slide');D.go(sl.id);const i=a.querySelector('input'),t=+a.dataset.ans;i.value='';const e0=D.ansCheck(a);i.value=String(t+7);const e1=D.ansCheck(a);i.value=t.toLocaleString('en-US');const ok=D.ansCheck(a);const c=D.cur();i.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));const stay=D.cur()===c;i.value='';a.classList.remove('ok','bad');a.querySelector('em').textContent='';if(e0||e1||!ok||!stay)R.ans.push({id:sl.id,t,e0,e1,ok,stay});});R.ansN=document.querySelectorAll('.ansb').length;
+// sheets: a click on a cell fills the panel and does not move the slide; practice cells accept the right value only
+R.xl=[];R.xlN=0;document.querySelectorAll('.xlw').forEach(w=>{const sl=w.closest('.slide');D.go(sl.id);D.setAll(sl,true);w.querySelectorAll('td.xc').forEach(c=>{R.xlN++;const cur=D.cur();c.dispatchEvent(new MouseEvent('click',{bubbles:true}));const p=w.querySelector('.xlp').textContent;if(D.cur()!==cur||p.length<8||!c.classList.contains('sel'))R.xl.push({id:sl.id,a:c.dataset.a,p:p.slice(0,30)});
+ const i=c.querySelector('.xin');if(i){const t=+i.dataset.ans;i.value=String(t+50);const e1=D.xlCheck(c);i.value=i.dataset.fmt;const ok=D.xlCheck(c);if(e1||!ok)R.xl.push({id:sl.id,a:c.dataset.a,fmt:i.dataset.fmt,e1,ok});i.value='';c.classList.remove('ok','bad','open');}});
+ w.querySelectorAll('.xarr').forEach(x=>{D.xlShow(x);if(!x.querySelector('svg path'))R.xl.push({id:sl.id,arrow:x.dataset.from+'>'+x.dataset.to});});D.setAll(sl,false);});
 // every in-deck link must lead somewhere
 R.links=[...document.querySelectorAll('.lnk[data-go]')].filter(b=>!document.getElementById(b.dataset.go)).map(b=>b.dataset.go);
 document.documentElement.setAttribute('data-test',JSON.stringify(R));
@@ -121,7 +125,8 @@ for a in R['alt']:
     FAIL += not a['ok'] or a['bottom'] > 684
 print('shell problems', R['shell'])
 print('answer boxes', R['ansN'], 'problems', R['ans'], 'broken links', R['links'])
-FAIL += len(R['ans']) + len(R['links'])
+print('sheet cells', R['xlN'], 'problems', R['xl'][:12])
+FAIL += len(R['ans']) + len(R['links']) + len(R['xl'])
 print('terms missing', R['terms'], 'used', R['termsUsed'], 'of', R['termsTotal'], 'unused', R['unusedTerms'], 'bad go', R['go'])
 FAIL += len(R['shell']) + bool(R['errors']) + len(R['overflow']) + len(R['eqwide']) + len(R['small']) + len(R['chars']) + len(R['reveal']) + len(bad) + len(R['terms']) + len(R['go']) + len(R['signBad']) + len(R['unusedTerms'])
 print('RESULT', 'PASS' if not FAIL else f'FAIL ({FAIL})')

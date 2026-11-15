@@ -5,7 +5,7 @@ sys.path.insert(0, H)
 R = lambda f: open(os.path.join(H, f), encoding='utf8').read()
 MODE = 'pdf'
 LESSON = int(os.environ.get('LESSON', '1'))
-FILES = {1: ('frame.py', 'content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'), 2: ('frame.py', 'l2_a.py', 'l2_b.py', 'l2_c.py')}
+FILES = {1: ('frame.py', 'content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'), 2: ('frame.py', 'xl.py', 'l2_a.py', 'l2_b.py', 'l2_c.py')}
 for f in FILES[LESSON]:
     exec(R(f))
 FONTS = os.path.join(H, '..', '..', 'iit-build', 'fonts')
@@ -208,6 +208,29 @@ table.map{width:100%;border-collapse:collapse;font-size:10.4pt}
 .illw{margin:1mm 0;break-inside:avoid}
 .ident{display:flex;direction:ltr;gap:2mm;align-items:stretch}.ibox{flex:1;border-radius:1.4mm;padding:1mm;text-align:center;direction:rtl}.ibox small{display:block}.iop{align-self:center;font-weight:700}
 .chkw,.chkh{display:none}
+
+.xlw{margin:1mm 0 2mm;break-inside:avoid}
+table.xl{width:100%;border-collapse:collapse;font-size:10.4pt;table-layout:fixed}
+.xl td,.xl th{border:.2mm solid #cfd3da;padding:.4mm 1.5mm}
+.xl .xcol,.xl .rh{display:none}
+.xl .xhd td{background:#1d6f42;color:#fff;font-weight:700;text-align:center}
+.xl td.nm{text-align:left;direction:ltr}
+.xl tr.xsec td{background:#e8f1ea;font-weight:700}
+.xl tr.bal td{font-weight:700;border-top:.4mm solid #1b2d55}
+.xl tr.plug td{background:#fff3d6;font-weight:700}.xl tr.net td{background:#dcf5e6;font-weight:700}
+.xl tr.out td{color:#8a93aa}.xl tr.help td{font-style:italic}
+.xl .xx,.xl .xh2{display:none}
+ol.xln{font-size:9.8pt;margin:.8mm 0 0;padding-right:5mm;color:#2a3858}
+ol.xln li{margin-bottom:.2mm}
+.xst{font-weight:700;color:#c4421f;margin-top:1mm}
+.qstem p.cur{font-weight:700}
+.kd.class{background:#ffe2a8}
+.where{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+.wf{display:grid;grid-template-columns:repeat(6,1fr);gap:1.5mm}.wfx{display:none}
+.wfs{border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm 1.5mm;font-size:10pt;display:flex;flex-direction:column}
+.wfs b{color:var(--navy)}.wfn{font-weight:700;color:#c4421f}.wfs em{font-style:normal;color:#167a43}
+.memer{display:flex;gap:3mm;align-items:center}.meme{width:70mm;text-align:center;border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm}
+.mimg{width:100%;height:auto;max-height:38mm}.mtop,.mbot{font-weight:700}
 '''
 parts = {}
 for s in SL:
