@@ -156,7 +156,7 @@ def SOL(stages, n0=1, flow=None, after=(), layout='', tip=None, side_panel=False
         elif not here: here = set(range(1, len(flow) + 1)); lo = 1
         else: lo = min(here)
         strip = '<div class="sgf">' + ''.join(
-            (f'<span class="on"><b>{i + 1}</b><label>{TX(t)}</label></span>' if i + 1 in here else f'<span class="{"done" if i + 1 < lo else ""}" title="{t}"><b>{i + 1}</b></span>') for i, t in enumerate(flow)) + '</div>'
+            (f'<span class="on"><b>{i + 1}</b><label>{TX(t)}</label></span>' if i + 1 in here and len(here) <= 2 else f'<span class="on" title="{t}"><b>{i + 1}</b></span>' if i + 1 in here else f'<span class="{"done" if i + 1 < lo else ""}" title="{t}"><b>{i + 1}</b></span>') for i, t in enumerate(flow)) + '</div>'
     aft = ''
     for kd, t in after:
         if MODE == 'deck':
@@ -315,6 +315,7 @@ def LIVEQ(sid, title, kind, story, asks, data, cfg, stack=False):
     task = 'נתונים בתאים, ונוסחאות שמפנות אליהם. ״הצעד הבא״ ממלא שורה בכל לחיצה.'
     cj = _html.escape(_json.dumps(cfg, ensure_ascii=False), quote=True)
     w = sum(cfg['widths'][:-2]) + 34 + 24
+    stack = stack and w > 640   # a narrow sheet sits beside the question even when the solution slides are stacked
     body = (f'<div class="act xlq qx{" stk" if stack else (" wide" if sum(cfg["widths"][:-2]) > 520 else "")}" id="{sid}-x" data-cfg="{cj}"' + ('' if stack else f' style="grid-template-columns:minmax(0,1fr) {w}px"') + f'><div class="qr">{q}<div class="tasktxt sm">{TX(task)}</div><div class="xfbs"></div></div>'
             f'<div class="xw"><div class="sheet"></div></div></div>')
     S(sid, f'{lab}: {title}', f'{lab}: {title}', body, kick=f'חלק {CUR[0]} · {lab}', cls='qslide xslide')
@@ -427,3 +428,61 @@ def MOVES(rows, cls='sm'):
         b += (f'<tr data-k="{d}"><td><span class="n">{d}</span></td><td>{TX(kind)}</td><td><span class="n">{q:,}</span></td><td>{TX(lab)} <span class="n">{p}</span></td>'
               f'<td class="dtx"><span class="n">{q:,}</span> × <span class="n">{p}</span> = <b class="n">{q * p:,}</b></td></tr>')
     return f'<table class="dt {cls} mv">{h}{b}</table>'
+
+
+# ---------------------------------------------------------------- shared small helpers (lesson 2 defines the same)
+def DT(head, rows, cls=''):
+    h = ''.join(f'<th>{TX(x)}</th>' for x in head)
+    b = ''.join('<tr>' + ''.join(f'<td>{TX(str(c))}</td>' for c in r) + '</tr>' for r in rows)
+    return f'<table class="dt {cls}"><tr>{h}</tr>{b}</table>'
+
+
+def LINK(go, text):
+    return f'<button class="lnk" data-go="{go}">{TX(text)}</button>' if MODE == 'deck' else f'<span class="lnk">{TX(text)}</span>'
+
+
+def BADGE():
+    return '<span class="kd class">' + TX('פתרנו בשיעור') + '</span>'
+
+
+def f0(v):
+    return f'{v:,.0f}'
+
+
+def f2(v):
+    s = f'{v:,.2f}'
+    return s[:-3] if s.endswith('.00') else s
+
+
+def MONTHS(start, end):
+    """Months from the first day of start (y, m) to the first day of end (y, m)."""
+    return (end[0] - start[0]) * 12 + end[1] - start[1]
+
+
+def TLINE(start, end, annual, end_lab, title, num=None, back=None, back_lab=''):
+    """Depreciation along time: one box per calendar year from the date the asset is available (start, first of month)
+    to end (first of month; 31.12.Y is (Y + 1, 1)); each box shows its months and its depreciation, revealed year by year."""
+    yrs = []
+    for y in range(start[0], end[0] + 1):
+        a = start[1] if y == start[0] else 1
+        b = end[1] if y == end[0] else 13
+        if b > a: yrs.append((y, b - a))
+    tot = sum(m for _, m in yrs)
+    notes = [(f'{y}', f'{m} חודשים: ${f2(annual)} × {m} ÷ 12 = {f2(annual * m / 12)}$.' + (' שנה ראשונה: רק מן המועד שבו הנכס זמין לשימוש.' if i == 0 and m < 12 else '')) for i, (y, m) in enumerate(yrs)]
+    whole, rest = divmod(tot, 12)
+    span = (f'{whole} שנים' if whole != 1 else 'שנה אחת') + (f' ו-{rest} חודשים' if rest else '')
+    notes.append(('סך הכול', f'{tot} חודשים, כלומר {span}: ${f2(annual)} × {tot} ÷ 12 = {f2(annual * tot / 12)}$.'))
+
+    def fn(n0):
+        if MODE == 'pdf':
+            return '<ol class="xln">' + ''.join(f'<li>{TX(a)}: {TX(b)}</li>' for a, b in notes) + '</ol>', n0, []
+        st = lambda k, cls, inner, x=None: (f'<div class="st {cls}{" ec auto" if x else ""}" data-n="{(n0 + k) * 10}">{inner}'
+                                            + (f'<div class="xx"><b>{TX(x[0])}:</b> {TX(x[1])}</div>' if x else '') + '</div>')
+        h = '<div class="dtl">'
+        top = f'<b>{TX("פחת לשנה מלאה: " + f2(annual) + " ש״ח")}</b> {TX("מתחילים מן המועד שבו הנכס זמין לשימוש, ולא מיום הרכישה.")}'
+        h += '<div class="fvtop">' + st(0, 'fvs', top) + (f'<button class="lnk" data-go="{back}">{TX(back_lab)}</button>' if back and MODE == 'deck' else '') + '</div>'
+        boxes = ''.join(st(1 + i, 'tly', f'<b class="n">{y}</b><span>{TX(f"{m} חודשים")}</span><em>{TX(f2(annual * m / 12))}</em>', notes[i]) .replace('class="st tly', f'style="flex:{m} 1 0" class="st tly') for i, (y, m) in enumerate(yrs))
+        h += f'<div class="tltime"><span>{TX("זמין לשימוש")}</span><i></i><span>{TX(end_lab)}</span></div><div class="tlrow">{boxes}</div>'
+        h += st(1 + len(yrs), 'fvtot', TX(f'{tot} חודשים ({span}): פחת נצבר <b>{f2(annual * tot / 12)}</b> ש״ח'), notes[-1])
+        return h + '</div>', n0 + 2 + len(yrs), []
+    return STG(num, title, [], [], fn=fn)

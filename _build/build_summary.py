@@ -5,7 +5,7 @@ sys.path.insert(0, H)
 R = lambda f: open(os.path.join(H, f), encoding='utf8').read()
 MODE = 'pdf'
 LESSON = int(os.environ.get('LESSON', '1'))
-FILES = {1: ('frame.py', 'content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'), 2: ('frame.py', 'xl.py', 'l2_a.py', 'l2_b.py', 'l2_c.py')}
+FILES = {1: ('frame.py', 'content_a.py', 'content_t.py', 'content_b.py', 'content_c.py'), 2: ('frame.py', 'xl.py', 'l2_a.py', 'l2_b.py', 'l2_c.py'), 3: ('frame.py', 'xl.py', 'l3_a.py', 'l3_b.py', 'l3_c.py')}
 for f in FILES[LESSON]:
     exec(R(f))
 FONTS = os.path.join(H, '..', '..', 'iit-build', 'fonts')
