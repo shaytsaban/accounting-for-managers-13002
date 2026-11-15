@@ -634,7 +634,6 @@ table.sg{font-size:18px}
 .qstem.xq .asks p{margin:1px 0;line-height:1.25}
 .qstem.xq .kd{margin-bottom:3px}
 .qstem.xq>.kd,.qstem.xq .qa>.kd{float:left;margin:0 8px 2px 0}
-.xstack .ql{columns:2;column-gap:22px}
 .xstack .ql .qi,.xstack .ql .qh{break-inside:avoid}
 .qtop{grid-template-columns:minmax(0,2.5fr) minmax(0,1fr)}
 .xstack .sg th,.xstack .sg td{height:27px;padding:1px 10px}
@@ -646,3 +645,12 @@ table.sg{font-size:18px}
 .pqa>.mc{padding:8px 12px}
 .pqa>.sopts p,.pqa>.sopts .q{font-size:16.5px}
 .sg.rt tr.prev td:first-child::after{content:none}
+.sg td:not(.nm):not(:first-child){text-align:center}
+.sg.rt td:nth-child(2){text-align:right}
+.sg tr.prev td:first-child::after{content:none!important}
+.qbot{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch}
+.qbot>:only-child{grid-column:1/-1}
+.qbot .sgp{min-height:44px}
+.qbot .band{margin:0}
+.xstack>.qstem .ql{columns:2;column-gap:26px}
+.xstack>.qstem .ql .qi,.xstack>.qstem .ql .qh{break-inside:avoid}

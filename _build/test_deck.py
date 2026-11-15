@@ -81,6 +81,15 @@ D.show(0);document.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:
 R.count=D.slides.length;R.opener=[...document.querySelectorAll('.pd')].length;R.st=document.querySelectorAll('.st').length;R.mcN=document.querySelectorAll('.mc').length;R.calcN=document.querySelectorAll('.calc').length;
 R.ans=[];document.querySelectorAll('.ansb').forEach(a=>{const sl=a.closest('.slide');D.go(sl.id);const i=a.querySelector('input'),t=+a.dataset.ans;i.value='';const e0=D.ansCheck(a);i.value=String(t+7);const e1=D.ansCheck(a);i.value=t.toLocaleString('en-US');const ok=D.ansCheck(a);const c=D.cur();i.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));const stay=D.cur()===c;i.value='';a.classList.remove('ok','bad');a.querySelector('em').textContent='';if(e0||e1||!ok||!stay)R.ans.push({id:sl.id,t,e0,e1,ok,stay});});R.ansN=document.querySelectorAll('.ansb').length;
 // sheets: a click on a cell fills the panel and does not move the slide; practice cells accept the right value only
+// alignment: in every table, the content of each column (after the first) shares one centre line, header included
+R.align=[];D.slides.forEach((s,i)=>{D.show(i);D.setAll(s,true);const k=stage.getBoundingClientRect().width/1280;
+ s.querySelectorAll('table.sg').forEach((tb,ti)=>{const rows=[...tb.rows];const n=Math.max(...rows.map(r=>r.cells.length));
+  for(let ci=1;ci<n;ci++){if(tb.classList.contains('rt')&&ci===1)continue;const cs=[];
+   rows.forEach(r=>{if(r.cells.length!==n)return;const td=r.cells[ci];if(!td||!td.textContent.replace(/\s/g,''))return;const sp=td.classList.contains('nm')?td.querySelector(':scope>.n,:scope>.cs>.n'):null;let rc;
+    if(sp){rc=sp.getBoundingClientRect();}else{const rg=document.createRange();rg.selectNodeContents(td);rc=rg.getBoundingClientRect();}
+    if(rc.width<1)return;cs.push({c:(rc.left+rc.right)/2/k,t:td.textContent.trim().slice(0,14)});});
+   if(cs.length<2)continue;const lo=Math.min(...cs.map(x=>x.c)),hi=Math.max(...cs.map(x=>x.c));
+   if(hi-lo>7)R.align.push({id:s.id,table:ti,col:ci,spread:Math.round(hi-lo),cells:cs.map(x=>x.t+':'+Math.round(x.c)).join(' | ')});}});D.setAll(s,false);});
 // solution tables: a click on every marked figure fills the panel, frames its source rows, and does not move the slide;
 // the longest explanation of each slide fits on the slide
 R.xl=[];R.xlN=0;R.fit=[];document.querySelectorAll('.sgw').forEach(w=>{const sl=w.closest('.slide');D.go(sl.id);D.setAll(sl,true);let longest='';
@@ -140,7 +149,8 @@ print('shell problems', R['shell'])
 print('answer boxes', R['ansN'], 'problems', R['ans'], 'broken links', R['links'])
 print('table figures', R['xlN'], 'problems', R['xl'][:12], 'panels that do not fit', R['fit'])
 print('live sheets', R['liveN'], 'problems', R['live'])
-FAIL += len(R['ans']) + len(R['links']) + len(R['xl']) + len(R['fit']) + len(R['live'])
+print('columns out of line', len(R['align']));[print('  ', o) for o in R['align'][:60]]
+FAIL += len(R['ans']) + len(R['links']) + len(R['xl']) + len(R['fit']) + len(R['live']) + len(R['align'])
 print('terms missing', R['terms'], 'used', R['termsUsed'], 'of', R['termsTotal'], 'unused', R['unusedTerms'], 'bad go', R['go'])
 FAIL += len(R['shell']) + bool(R['errors']) + len(R['overflow']) + len(R['eqwide']) + len(R['small']) + len(R['chars']) + len(R['reveal']) + len(bad) + len(R['terms']) + len(R['go']) + len(R['signBad']) + len(R['unusedTerms'])
 print('RESULT', 'PASS' if not FAIL else f'FAIL ({FAIL})')

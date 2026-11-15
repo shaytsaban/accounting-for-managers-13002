@@ -26,6 +26,7 @@ def AR(fr, to, o, x):
 
 
 def _num(v):
+    if isinstance(v, str) and re.fullmatch(r'-?\d[\d,]*(\.\d+)?%', v): return v   # a rate is laid out like a number
     if isinstance(v, bool) or not isinstance(v, (int, float)): return None
     r = round(v)
     s = f'{abs(v):,.2f}' if abs(v - r) > 1e-9 else f'{abs(r):,}'
@@ -257,7 +258,7 @@ def XQ(key, title, kind, story, asks, slides, data='', stack=False, flow=None, l
         head = f'{KIND[kd]}: {title}{tag}'
         q = QCARD(kd, story, asks, sl.get('cur'), data)
         # the explanation panel and the tips sit beside the question, where the slide has room
-        body = (f'<div class="xstack"><div class="qtop">{q}<div class="qside">{pan}{aft}</div></div>{h}</div>' if stack
+        body = (f'<div class="xstack">{q}{h}<div class="qbot">{pan}{aft}</div></div>' if stack
                 else f'<div class="xg"><div class="pqq">{q}{pan}{aft}</div><div class="pqa">{h}</div></div>')
         S(sid + ('s' if kind == 'alone' else '') + ('' if not i else f'c{i + 1}'), head, head, body, kick=f'חלק {CUR[0]} · {KIND[kd]}', cls='qslide')
     # the live sheet keeps only the requirements its solution slides dealt with
@@ -334,8 +335,8 @@ def LIVE(cols, rows, widths, hints=None, remind=None, fmt='acc0', center=(), don
     vin = [a for a in sol if not str(sol[a]).startswith('=')]
     targets = list(sol)
     nrow = len(rows) + 1
-    w = list(widths) + [80] * 2
-    return dict(rows=nrow + 10, cols=len(cols) + 2, widths=w, data=data, targets=targets, solution=sol, headRows=[1], inputs=[], fmt=fm, solFmt=fm,
+    w = list(widths) + [44]
+    return dict(rows=nrow + 10, cols=len(cols) + 1, widths=w, data=data, targets=targets, solution=sol, headRows=[1], inputs=[], fmt=fm, solFmt=fm,
                 hints=[TX(x) for x in (hints or ['קראו את כותרת השורה, כתבו במילים מה מחשבים, ורק אז כתבו נוסחה שמפנה לתאים.'])],
                 partial=vin + [a for a in targets if a not in vin][:1], values=False, done=TX(done or 'זה הפתרון המלא. השוו אותו לטבלאות הפתרון.'),
                 maxh=2000, vin=vin, steps=steps, sty=sty, **({'remind': TX(remind)} if remind else {}))
@@ -352,9 +353,9 @@ def LIVEQ(sid, title, kind, story, asks, data, cfg, stack=False):
     q = QCARD(kind, story, asks, None, data)
     task = 'נתונים בתאים, ונוסחאות שמפנות אליהם. ״הצעד הבא״ ממלא שורה בכל לחיצה.'
     cj = _html.escape(_json.dumps(cfg, ensure_ascii=False), quote=True)
-    w = sum(cfg['widths'][:-2]) + 34 + 24
-    stack = stack and w > 640   # a narrow sheet sits beside the question even when the solution slides are stacked
-    body = (f'<div class="act xlq qx{" stk" if stack else (" wide" if sum(cfg["widths"][:-2]) > 520 else "")}" id="{sid}-x" data-cfg="{cj}"' + ('' if stack else f' style="grid-template-columns:minmax(0,1fr) {w}px"') + f'><div class="qr">{q}<div class="tasktxt sm">{TX(task)}</div><div class="xfbs"></div></div>'
+    w = sum(cfg['widths']) + 34 + 26
+    stack = False   # the live sheet always sits beside the question, so it keeps its height
+    body = (f'<div class="act xlq qx{" stk" if stack else (" wide" if sum(cfg["widths"][:-1]) > 520 else "")}" id="{sid}-x" data-cfg="{cj}"' + ('' if stack else f' style="grid-template-columns:minmax(0,1fr) {w}px"') + f'><div class="qr">{q}<div class="tasktxt sm">{TX(task)}</div><div class="xfbs"></div></div>'
             f'<div class="xw"><div class="sheet"></div></div></div>')
     S(sid, f'{lab}: {title}', f'{lab}: {title}', body, kick=f'חלק {CUR[0]} · {lab}', cls='qslide xslide')
 
