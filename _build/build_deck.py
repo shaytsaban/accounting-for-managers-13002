@@ -55,10 +55,10 @@ fonts = R('shell/fonts.css')
 base = R('shell/base.css')
 tail = R('shell/tail.html')
 gj = json.dumps(G, ensure_ascii=False)
-js = f'const COURSE={json.dumps(COURSE, ensure_ascii=False)};const LESSON={LESSON};\nconst G={gj};\n' + R('deck.js') + '\n' + R('calcs.js')
+js = f'const COURSE={json.dumps(COURSE, ensure_ascii=False)};const LESSON={LESSON};\nconst G={gj};\n' + R('deck.js') + '\n' + R('calcs.js') + ('\n' + R('xlengine.js') + '\n' + R('live.js') if LESSON >= 2 else '')
 title = f'{COURSE} | שיעור {LESSON} | {META["title"]}'
 html = (f'<!doctype html>\n<html lang="he" dir="rtl">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>{title}</title>\n<style>\n'
-        + fonts + base + R('deck.css') + '</style>\n</head>\n<body>\n<div class="stage" id="stage">\n' + slides_html + '\n' + tail
+        + fonts + base + R('deck.css') + (R('live.css') if LESSON >= 2 else '') + '</style>\n</head>\n<body>\n<div class="stage" id="stage">\n' + slides_html + '\n' + tail
         + '<script>\n(function(){\n' + js + '\n})();\n</script>\n</body>\n</html>\n')
 
 for bad in ('—', '־'):
@@ -68,9 +68,9 @@ os.makedirs(out, exist_ok=True)
 open(os.path.join(out, 'presentation.html'), 'w', encoding='utf8').write(html)
 
 # every class used in the markup or in the scripts needs a CSS rule
-css = fonts + base + R('deck.css')
+css = fonts + base + R('deck.css') + R('live.css')
 used = set()
-for m in re.finditer(r'class="([^"]+)"', slides_html + tail + R('deck.js') + R('calcs.js')):
+for m in re.finditer(r'class="([^"]+)"', slides_html + tail + R('deck.js') + R('calcs.js') + R('live.js')):
     for c in m.group(1).split():
         if re.fullmatch(r'[\w-]+', c): used.add(c)
 missing = sorted(c for c in used if not re.search(r'\.' + re.escape(c) + r'(?![\w-])', css))

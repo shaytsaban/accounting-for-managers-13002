@@ -18,23 +18,36 @@ $$('.mc').forEach(m=>{const a=+m.dataset.a;m.addEventListener('click',e=>{const 
 function ansCheck(a){const i=a.querySelector('input'),raw=i.value.trim(),v=parseFloat(raw.replace(/[,\s₪]/g,'').replace('−','-')),t=+a.dataset.ans,ok=!isNaN(v)&&Math.abs(v-t)<=1;a.classList.remove('ok','bad');a.classList.add(ok?'ok':'bad');a.querySelector('em').textContent=raw===''?'הקלידו מספר':ok?'נכון!':'לא מדויק, נסו שוב';return ok;}
 $$('.ansb').forEach(a=>{a.querySelector('button').onclick=e=>{e.stopPropagation();ansCheck(a);};a.querySelector('input').addEventListener('keydown',e=>{if(e.key==='Enter')ansCheck(a);});});
 
-/* ---------- sheets: a click on a cell shows its formula and arithmetic; practice cells check what was typed ---------- */
-function xlClear(w){w.querySelectorAll('.sel,.ref').forEach(e=>e.classList.remove('sel','ref','r0','r1','r2','r3'));}
-function xlRefs(w,f){let i=0;(f.match(/[A-J]\d+(?::[A-J]\d+)?/g)||[]).forEach(ad=>{const p=ad.split(':'),cells=[];if(p[1]){for(let c=p[0].charCodeAt(0);c<=p[1].charCodeAt(0);c++)for(let r=+p[0].slice(1);r<=+p[1].slice(1);r++)cells.push(String.fromCharCode(c)+r);}else cells.push(p[0]);cells.forEach(a=>{const t=w.querySelector('td[data-a="'+a+'"]');if(t)t.classList.add('ref','r'+(i%4));});i++;});}
-function xlArrow(el){const sc=el.parentElement,f=sc.querySelector('td[data-a="'+el.dataset.from+'"]'),t=sc.querySelector('td[data-a="'+el.dataset.to+'"]');if(!f||!t||!sc.offsetWidth)return;const R=sc.getBoundingClientRect(),k=R.width/sc.offsetWidth,a=f.getBoundingClientRect(),b=t.getBoundingClientRect();
- const x1=(a.left+a.width*.3-R.left)/k,y1=(a.bottom-R.top)/k-3,x2=(b.left+b.width*.7-R.left)/k,y2=(b.top-R.top)/k+5,id='ah'+Math.random().toString(36).slice(2,7);
- let s=el.querySelector('svg');if(s)s.remove();el.insertAdjacentHTML('afterbegin','<svg width="'+sc.offsetWidth+'" height="'+sc.offsetHeight+'"><defs><marker id="'+id+'" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ff6a4d"/></marker></defs><path class="ap" d="M'+x1+' '+y1+' C '+(x1-20)+' '+(y1+26)+', '+(x2+30)+' '+(y2-30)+', '+x2+' '+y2+'" marker-end="url(#'+id+')"/></svg>');}
-function xlShow(c){const w=c.closest('.xlw');if(!w)return;xlClear(w);const p=w.querySelector('.xlp'),xa=w.querySelector('.xa'),xf=w.querySelector('.xf');
- if(c.classList.contains('xarr')){xlArrow(c);p.innerHTML=c.querySelector('.xx').innerHTML;xa.textContent='';xf.textContent='';return;}
- c.classList.add('sel');const f=c.dataset.f||'';xa.textContent=c.dataset.a||'';xf.textContent=f;xlRefs(w,f);const pr=c.querySelector('.xin');
- if(pr&&!c.classList.contains('open')){p.innerHTML='<b>'+c.dataset.a+':</b> '+c.querySelector('.xh2').innerHTML+' <button class="xsh" type="button">הצגת החישוב</button>';p.querySelector('.xsh').onclick=e=>{e.stopPropagation();c.classList.add('open');pr.value=pr.dataset.fmt;xlCheck(c);xlShow(c);};}
- else p.innerHTML='<b>'+c.dataset.a+':</b> '+c.querySelector('.xx').innerHTML;}
-function xlCheck(c){const i=c.querySelector('.xin'),raw=i.value.trim();let s=raw.replace(/[,\s₪]/g,'').replace('−','-');if(/^\(.*\)$/.test(s))s='-'+s.slice(1,-1);const v=parseFloat(s),t=+i.dataset.ans,tol=Math.abs(t)>=1000?1:.01,ok=raw!==''&&!isNaN(v)&&Math.abs(v-t)<=tol;c.classList.remove('ok','bad');if(raw!=='')c.classList.add(ok?'ok':'bad');return ok;}
-$$('.xlw td.xc').forEach(c=>c.addEventListener('click',e=>{if(e.target.closest('.xsh'))return;e.stopPropagation();xlShow(c);}));
-$$('.xin').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){xlCheck(i.closest('td'));}}));
-$$('.xchk').forEach(b=>b.onclick=e=>{e.stopPropagation();const w=b.closest('.xlw');let ok=0,n=0;w.querySelectorAll('td.pr').forEach(c=>{n++;if(xlCheck(c))ok++;});b.nextElementSibling.textContent=ok+' מתוך '+n+' נכונים'+(ok===n?' · כל הכבוד!':'');});
-function xlReveal(e){const a=e.matches&&e.matches('.auto')?e:(e.querySelector&&e.querySelector('.auto'));if(a)xlShow(a.closest('.xc')||a);}
-addEventListener('resize',()=>$$('.slide.on .xarr.show').forEach(xlArrow));
+/* ---------- solution tables: a click on a figure shows its calculation under the cards; arrows carry a figure to the next year ---------- */
+function sgClear(w){w.querySelectorAll('.sel,.ref,.asrc,.atgt').forEach(e=>e.classList.remove('sel','ref','r0','r1','r2','r3','asrc','atgt'));const sl=w.closest('.slide');if(sl)sl.querySelectorAll('.mv tr.hl').forEach(r=>r.classList.remove('hl'));if(sl)sl.querySelectorAll('.mv.hlon').forEach(t=>t.classList.remove('hlon'));}
+function sgRefs(w,f){let i=0;(f.match(/g\d+-[A-J]\d+(?::g\d+-[A-J]\d+)?/g)||[]).forEach(ad=>{const p=ad.split(':'),cells=[];if(p[1]){const pre=p[0].split('-')[0]+'-',A=p[0].split('-')[1],B=p[1].split('-')[1];for(let c=A.charCodeAt(0);c<=B.charCodeAt(0);c++)for(let r=+A.slice(1);r<=+B.slice(1);r++)cells.push(pre+String.fromCharCode(c)+r);}else cells.push(p[0]);cells.forEach(a=>{const t=w.querySelector('td[data-a="'+a+'"]');if(t)t.classList.add('ref','r'+(i%4));});i++;});}
+function sgArrow(el){const sc=el.parentElement,f=sc.querySelector('td[data-a="'+el.dataset.from+'"]'),t=sc.querySelector('td[data-a="'+el.dataset.to+'"]');if(!f||!t||!sc.offsetWidth)return;
+ const R=sc.getBoundingClientRect(),k=R.width/sc.offsetWidth,tx=e=>{const n=e.querySelector('.n')||e;return n.getBoundingClientRect();},a=tx(f),b=tx(t);
+ /* from the left end of the figure in one year to the right end of the figure in the next year (the column to its left) */
+ const x1=(a.left-R.left)/k-5,y1=(a.top+a.height/2-R.top)/k,x2=(b.right-R.left)/k+5,y2=(b.top+b.height/2-R.top)/k,c=Math.max(16,(x1-x2)/2);
+ const head='M'+x2+' '+y2+' l10 -6 l0 12 z';
+ let s=el.querySelector('svg');if(s)s.remove();el.insertAdjacentHTML('afterbegin','<svg width="'+sc.offsetWidth+'" height="'+sc.offsetHeight+'"><path class="ap" d="M'+x1+' '+y1+' C '+(x1-c)+' '+y1+', '+(x2+10+c)+' '+y2+', '+(x2+10)+' '+y2+'"/><path class="ah" d="'+head+'"/></svg>');
+ f.classList.add('asrc');t.classList.add('atgt');}
+function sgShow(c){const w=c.closest('.sgw');if(!w)return;sgClear(w);const p=w.querySelector('.sgp')||w.closest('.slide').querySelector('.sgp');if(!p)return;
+ if(c.classList.contains('sga')){sgArrow(c);p.innerHTML=c.querySelector('.xx').innerHTML;return;}
+ c.classList.add('sel');sgRefs(w,c.dataset.f||'');p.innerHTML=c.querySelector('.xx').innerHTML;
+ /* the rows of the question's movements table that this figure comes from: framed, with units × unit figure */
+ if(c.dataset.hl){const sl=c.closest('.slide');c.dataset.hl.split(' ').forEach(k=>{const r=sl.querySelector('.mv tr[data-k="'+k+'"]');if(r){r.classList.add('hl');r.closest('table').classList.add('hlon');}});}}
+$$('.sgw .ec').forEach(c=>c.addEventListener('click',e=>{e.stopPropagation();sgShow(c);}));
+function sgReveal(e){const a=e.matches&&e.matches('.auto')?e:(e.querySelector&&e.querySelector('.auto'));if(a)sgShow(a.closest('.ec')||a);}
+addEventListener('resize',()=>$$('.slide.on .sga.show').forEach(sgArrow));
+
+/* ---------- the explanation panel and the tips go to the column that has room for them ---------- */
+function placeSide(sl){const g=sl.querySelector('.xg');if(!g)return;const q=g.querySelector('.pqq'),a=g.querySelector('.pqa');if(!q||!a)return;
+ const R=sl.getBoundingClientRect(),k=R.height/720,lim=R.top+(sl.querySelector('.ft')?681:713)*k;
+ const items=[...sl.querySelectorAll('.xg .sgp,.xg .pqq>.band,.xg .pqq>.pun,.xg .pqa>.band,.xg .pqa>.pun')];if(!items.length)return;
+ const p=sl.querySelector('.xg .sgp');let longest='';sl.querySelectorAll('.xg .ec .xx,.xg .sga .xx').forEach(x=>{if(x.innerHTML.length>longest.length)longest=x.innerHTML;});
+ const keep=p?p.innerHTML:'';if(p&&longest.length>keep.length)p.innerHTML=longest;
+ const bottom=col=>Math.max(0,...[...col.children].map(e=>e.getBoundingClientRect().bottom));
+ /* try every split of the side items (in order) between the two columns, and keep the first one that fits; else the lowest */
+ let best=null;for(let cut=items.length;cut>=0;cut--){items.forEach((e,i)=>(i<cut?q:a).appendChild(e));const m=Math.max(bottom(q),bottom(a));if(m<=lim+.5){best=cut;break;}if(best===null||m<best.m)best={cut,m};}
+ const cut=typeof best==='number'?best:best.cut;items.forEach((e,i)=>(i<cut?q:a).appendChild(e));
+ if(p)p.innerHTML=keep;}
 
 /* ---------- glossary drawer ---------- */
 const gk=Object.keys(G);const dr=$('#drawer');let dkey=null;
@@ -45,12 +58,14 @@ $('#gwrap').innerHTML=gk.map(k=>`<button class="gitem" data-t="${k}">${G[k].h}<d
 $('#gpl').innerHTML=gk.map(k=>`<div class="gp"><b>${G[k].h}</b> (${G[k].en})<br>${G[k].p}<br>דוגמה: ${G[k].ex}</div>`).join('');
 
 /* ---------- navigation ---------- */
-function show(i,reveal){if(i<0||i>=slides.length)return;slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');setAll(slides[cur],!!reveal);
+function show(i,reveal){if(i<0||i>=slides.length)return;slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');setAll(slides[cur],!!reveal);placeSide(slides[cur]);
  $('#cnt').textContent=(cur+1)+' / '+slides.length;$('#progi').style.width=((cur+1)/slides.length*100)+'%';
  try{history.replaceState(null,'','#'+slides[cur].id);}catch(e){}
- $$('.mcell').forEach((c,j)=>c.classList.toggle('cur',j===cur));stepInfo();setTimeout(()=>slides[cur].querySelectorAll('.xarr.show').forEach(xlArrow),30);}
+ $$('.mcell').forEach((c,j)=>c.classList.toggle('cur',j===cur));stepInfo();setTimeout(()=>{slides[cur].querySelectorAll('.sga.show').forEach(sgArrow);slides[cur].querySelectorAll('.asrc,.atgt').forEach(e=>e.classList.remove('asrc','atgt'));},30);if(window.__fitSheets)window.__fitSheets(slides[cur]);}
 function go(id){const i=slides.findIndex(s=>s.id===id);if(i>=0){closeOverlays();show(i);}}
-function next(){const p=pending(slides[cur]);if(p.length){p[0].forEach(e=>{e.classList.add('show');xlReveal(e);});stepInfo();return;}show(cur+1);}
+function next(){/* a step by step demonstration in a live sheet goes on with the same key */
+ const sh=$$('.sheet',slides[cur]).map(x=>x.__api).find(a=>a&&a.stepActive&&a.stepActive());if(sh){sh.stepNext();return;}
+ const p=pending(slides[cur]);if(p.length){p[0].forEach(e=>{e.classList.add('show');sgReveal(e);});stepInfo();return;}show(cur+1);}
 function prev(){const s=shown(slides[cur]);if(s.length){s[s.length-1].forEach(e=>e.classList.remove('show'));stepInfo();return;}show(cur-1,true);}
 $('#bNext').onclick=next;$('#bPrev').onclick=prev;
 $('#prog').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();const f=(r.right-e.clientX)/r.width;show(Math.min(slides.length-1,Math.floor(f*slides.length)));};
@@ -68,14 +83,14 @@ document.addEventListener('keydown',e=>{if(typing(e)){if(e.key==='Escape')e.targ
  else if(e.key==='Escape'){closeOverlays();}
  else if(e.key==='Home'){show(0);}else if(e.key==='End'){show(slides.length-1);}});
 function fit(){const s=Math.min(innerWidth/1280,(innerHeight-44-14)/720);stage.style.setProperty('--sc',s);}
-addEventListener('resize',fit);fit();
+addEventListener('resize',()=>{fit();if(window.__fitSheets)window.__fitSheets(slides[cur]);});fit();
 document.addEventListener('click',e=>{const t=e.target.closest('[data-t]');if(t&&G[t.dataset.t]){e.stopPropagation();openTerm(t.dataset.t);return;}
  const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return;}
  if(!e.target.closest('#drawer'))dr.classList.remove('open');
  /* a click on the empty part of a slide advances, as on a classroom board */
- if(e.target.closest('#stage')&&!e.target.closest('button,a,input,select,label,.mc,.calc,.term,.xlw')&&!document.getSelection().toString())next();});
+ if(e.target.closest('#stage')&&!e.target.closest('button,a,input,select,label,textarea,.mc,.calc,.term,.sgw,.xlq')&&!document.getSelection().toString())next();});
 
 /* ---------- footers and boot ---------- */
 slides.forEach((s,i)=>{if(s.id==='s-title'||s.id==='s-end'||s.classList.contains('pd'))return;const f=document.createElement('div');f.className='ft';f.innerHTML='<span>'+COURSE+' · שיעור '+LESSON+'</span><span><b>ד״ר שי צבאן</b> · <span class="n">'+(i+1)+'</span></span>';s.appendChild(f);});
 (function(){const h=location.hash.slice(1);const hi=slides.findIndex(s=>s.id===h);show(hi>=0?hi:0);})();
-window.__deck={ansCheck,xlShow,xlCheck,show,next,prev,go,slides,groups,pending,setAll,openTerm,closeOverlays,cur:()=>cur};
+window.__deck={ansCheck,sgShow,placeSide,show,next,prev,go,slides,groups,pending,setAll,openTerm,closeOverlays,cur:()=>cur};

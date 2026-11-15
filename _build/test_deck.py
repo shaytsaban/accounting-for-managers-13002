@@ -24,13 +24,13 @@ D.slides.forEach((s,i)=>{D.show(i);D.setAll(s,true);
  // reveal every multiple choice answer so that the open state is what gets measured
  s.querySelectorAll('.mc').forEach(m=>{m.classList.add('done');const a=+m.dataset.a;m.querySelectorAll('.o')[a].classList.add('ok');});
  const foot=s.querySelector('.ft');const limit=foot?720-36:716;let worst=0,who='',wl=0,wr=1280;
- s.querySelectorAll('*').forEach(e=>{if(e.closest('.ft')||e.closest('.pd-num')||e.classList.contains('orb')||e.closest('.orb'))return;const c=getComputedStyle(e);if(c.display==='none'||c.visibility==='hidden')return;const r=rel(e);if(r.b-r.t<1)return;
+ s.querySelectorAll('*').forEach(e=>{if(e.closest('.ft')||e.closest('.pd-num')||e.classList.contains('orb')||e.closest('.orb'))return;if(e.closest('.xl-wrap')&&!e.classList.contains('xl-wrap'))return;if(e.closest('.xl-sink,.xl-pal,.xl-cm,.xl-sug'))return;const c=getComputedStyle(e);if(c.display==='none'||c.visibility==='hidden')return;const r=rel(e);if(r.b-r.t<1)return;
   if(r.b>worst){worst=r.b;who=e.tagName+'.'+(e.className.baseVal??e.className);}if(r.l<wl)wl=r.l;if(r.r>wr)wr=r.r;});
  if(worst>limit+.5||wl<-.5||wr>1280.5)R.overflow.push({i:i+1,id:s.id,bottom:Math.round(worst),limit,who,l:Math.round(wl),r:Math.round(wr)});
  // equations wider than their container
  s.querySelectorAll('.eq').forEach(e=>{const box=e.closest('.card,.solw,.cout,.fm,td,.slide');const inner=document.createRange();inner.selectNodeContents(e);const a=inner.getBoundingClientRect(),b=box.getBoundingClientRect();if(a.left<b.left-1||a.right>b.right+1)R.eqwide.push({id:s.id,t:e.textContent.slice(0,60),over:Math.round(Math.max(b.left-a.left,a.right-b.right))});});
  // text smaller than the board minimum
- const tw=document.createTreeWalker(s,NodeFilter.SHOW_TEXT);let n;const seen={};while((n=tw.nextNode())){if(!n.nodeValue.trim())continue;const p=n.parentElement;if(p.closest('.ft,sup,sub,tspan'))continue;if(p.checkVisibility&&!p.checkVisibility())continue;let fs=parseFloat(getComputedStyle(p).fontSize);const svg=p.closest('svg');if(svg){const vb=svg.viewBox.baseVal.width;fs*=svg.getBoundingClientRect().width/(stage.getBoundingClientRect().width/1280)/vb;if(fs<14.5)seen['svg '+fs.toFixed(1)]=n.nodeValue.slice(0,24);}else if(fs<16.5)seen[fs]=n.nodeValue.slice(0,24);}
+ const tw=document.createTreeWalker(s,NodeFilter.SHOW_TEXT);let n;const seen={};while((n=tw.nextNode())){if(!n.nodeValue.trim())continue;const p=n.parentElement;if(p.closest('.ft,sup,sub,tspan,.xl-rib,.xl-g thead,.xl-rn,.xl-name,.xl-fx'))continue;if(p.checkVisibility&&!p.checkVisibility())continue;let fs=parseFloat(getComputedStyle(p).fontSize);const svg=p.closest('svg');if(svg){const vb=svg.viewBox.baseVal.width;fs*=svg.getBoundingClientRect().width/(stage.getBoundingClientRect().width/1280)/vb;if(fs<14.5)seen['svg '+fs.toFixed(1)]=n.nodeValue.slice(0,24);}else if(fs<16.5)seen[fs]=n.nodeValue.slice(0,24);}
  if(Object.keys(seen).length)R.small.push({id:s.id,seen});
  // forbidden characters
  const txt=s.textContent;[['em','—'],['maqaf','־'],['en','–'],['ell','…'],['arrow','→'],['arrow2','⇒'],['q1','“'],['q2','”']].forEach(([k,c])=>{if(txt.includes(c))R.chars.push({id:s.id,k});});
@@ -81,9 +81,22 @@ D.show(0);document.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:
 R.count=D.slides.length;R.opener=[...document.querySelectorAll('.pd')].length;R.st=document.querySelectorAll('.st').length;R.mcN=document.querySelectorAll('.mc').length;R.calcN=document.querySelectorAll('.calc').length;
 R.ans=[];document.querySelectorAll('.ansb').forEach(a=>{const sl=a.closest('.slide');D.go(sl.id);const i=a.querySelector('input'),t=+a.dataset.ans;i.value='';const e0=D.ansCheck(a);i.value=String(t+7);const e1=D.ansCheck(a);i.value=t.toLocaleString('en-US');const ok=D.ansCheck(a);const c=D.cur();i.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));const stay=D.cur()===c;i.value='';a.classList.remove('ok','bad');a.querySelector('em').textContent='';if(e0||e1||!ok||!stay)R.ans.push({id:sl.id,t,e0,e1,ok,stay});});R.ansN=document.querySelectorAll('.ansb').length;
 // sheets: a click on a cell fills the panel and does not move the slide; practice cells accept the right value only
-R.xl=[];R.xlN=0;document.querySelectorAll('.xlw').forEach(w=>{const sl=w.closest('.slide');D.go(sl.id);D.setAll(sl,true);w.querySelectorAll('td.xc').forEach(c=>{R.xlN++;const cur=D.cur();c.dispatchEvent(new MouseEvent('click',{bubbles:true}));const p=w.querySelector('.xlp').textContent;if(D.cur()!==cur||p.length<8||!c.classList.contains('sel'))R.xl.push({id:sl.id,a:c.dataset.a,p:p.slice(0,30)});
- const i=c.querySelector('.xin');if(i){const t=+i.dataset.ans;i.value=String(t+50);const e1=D.xlCheck(c);i.value=i.dataset.fmt;const ok=D.xlCheck(c);if(e1||!ok)R.xl.push({id:sl.id,a:c.dataset.a,fmt:i.dataset.fmt,e1,ok});i.value='';c.classList.remove('ok','bad','open');}});
- w.querySelectorAll('.xarr').forEach(x=>{D.xlShow(x);if(!x.querySelector('svg path'))R.xl.push({id:sl.id,arrow:x.dataset.from+'>'+x.dataset.to});});D.setAll(sl,false);});
+// solution tables: a click on every marked figure fills the panel, frames its source rows, and does not move the slide;
+// the longest explanation of each slide fits on the slide
+R.xl=[];R.xlN=0;R.fit=[];document.querySelectorAll('.sgw').forEach(w=>{const sl=w.closest('.slide');D.go(sl.id);D.setAll(sl,true);let longest='';
+ w.querySelectorAll('.ec').forEach(c=>{R.xlN++;const cur=D.cur();c.dispatchEvent(new MouseEvent('click',{bubbles:true}));const p=(w.querySelector('.sgp')||sl.querySelector('.sgp'));const tx=p?p.textContent:'';
+  if(D.cur()!==cur||tx.length<8||!c.classList.contains('sel'))R.xl.push({id:sl.id,a:c.dataset.a,p:tx.slice(0,30)});
+  if(c.dataset.hl&&c.dataset.hl.split(' ').some(k=>!sl.querySelector('.mv tr.hl[data-k="'+k+'"]')))R.xl.push({id:sl.id,hl:c.dataset.hl});
+  const x=c.querySelector('.xx');if(x&&x.innerHTML.length>longest.length)longest=x.innerHTML;});
+ w.querySelectorAll('.sga').forEach(x=>{D.sgShow(x);if(!x.querySelector('svg path.ap'))R.xl.push({id:sl.id,arrow:x.dataset.from+'>'+x.dataset.to});});
+ const p=w.querySelector('.sgp')||sl.querySelector('.sgp');if(p&&longest){p.innerHTML=longest;const k=stage.getBoundingClientRect().width/1280,b=(p.getBoundingClientRect().bottom-stage.getBoundingClientRect().top)/k,lim=sl.querySelector('.ft')?684:716;if(b>lim+.5)R.fit.push({id:sl.id,bottom:Math.round(b)});}
+ D.setAll(sl,false);});
+// live sheets: the full solution passes the check, and the step demonstration fills every cell with the solution
+R.live=[];R.liveN=0;document.querySelectorAll('.xlq').forEach(b=>{const sl=b.closest('.slide');D.go(sl.id);const C=JSON.parse(b.dataset.cfg),h=b.querySelector('.sheet'),api=h.__api,btn=x=>b.querySelector('[data-x="'+x+'"]');R.liveN++;
+ btn('reset').click();btn('solve').click();const ok1=!!b.querySelector('.xl-ok')&&!b.querySelectorAll('td.e').length;
+ btn('reset').click();btn('step').click();for(let k=1;k<C.steps.length;k++)D.next();const ok2=C.targets.every(a=>api.raw(a)===C.solution[a]);btn('check').click();const ok3=!!b.querySelector('.xl-ok');
+ const fb=b.querySelector('.xl-fb');const k=stage.getBoundingClientRect().width/1280;const fbB=fb?(fb.getBoundingClientRect().bottom-stage.getBoundingClientRect().top)/k:0;
+ if(!ok1||!ok2||!ok3||fbB>686)R.live.push({id:sl.id,solve:ok1,steps:ok2,check:ok3,fb:Math.round(fbB)});btn('reset').click();});
 // every in-deck link must lead somewhere
 R.links=[...document.querySelectorAll('.lnk[data-go]')].filter(b=>!document.getElementById(b.dataset.go)).map(b=>b.dataset.go);
 document.documentElement.setAttribute('data-test',JSON.stringify(R));
@@ -125,8 +138,9 @@ for a in R['alt']:
     FAIL += not a['ok'] or a['bottom'] > 684
 print('shell problems', R['shell'])
 print('answer boxes', R['ansN'], 'problems', R['ans'], 'broken links', R['links'])
-print('sheet cells', R['xlN'], 'problems', R['xl'][:12])
-FAIL += len(R['ans']) + len(R['links']) + len(R['xl'])
+print('table figures', R['xlN'], 'problems', R['xl'][:12], 'panels that do not fit', R['fit'])
+print('live sheets', R['liveN'], 'problems', R['live'])
+FAIL += len(R['ans']) + len(R['links']) + len(R['xl']) + len(R['fit']) + len(R['live'])
 print('terms missing', R['terms'], 'used', R['termsUsed'], 'of', R['termsTotal'], 'unused', R['unusedTerms'], 'bad go', R['go'])
 FAIL += len(R['shell']) + bool(R['errors']) + len(R['overflow']) + len(R['eqwide']) + len(R['small']) + len(R['chars']) + len(R['reveal']) + len(bad) + len(R['terms']) + len(R['go']) + len(R['signBad']) + len(R['unusedTerms'])
 print('RESULT', 'PASS' if not FAIL else f'FAIL ({FAIL})')

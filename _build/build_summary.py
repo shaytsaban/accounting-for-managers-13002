@@ -209,17 +209,22 @@ table.map{width:100%;border-collapse:collapse;font-size:10.4pt}
 .ident{display:flex;direction:ltr;gap:2mm;align-items:stretch}.ibox{flex:1;border-radius:1.4mm;padding:1mm;text-align:center;direction:rtl}.ibox small{display:block}.iop{align-self:center;font-weight:700}
 .chkw,.chkh{display:none}
 
-.xlw{margin:1mm 0 2mm;break-inside:avoid}
-table.xl{width:100%;border-collapse:collapse;font-size:10.4pt;table-layout:fixed}
-.xl td,.xl th{border:.2mm solid #cfd3da;padding:.4mm 1.5mm}
-.xl .xcol,.xl .rh{display:none}
-.xl .xhd td{background:#1d6f42;color:#fff;font-weight:700;text-align:center}
-.xl td.nm{text-align:left;direction:ltr}
-.xl tr.xsec td{background:#e8f1ea;font-weight:700}
-.xl tr.bal td{font-weight:700;border-top:.4mm solid #1b2d55}
-.xl tr.plug td{background:#fff3d6;font-weight:700}.xl tr.net td{background:#dcf5e6;font-weight:700}
-.xl tr.out td{color:#8a93aa}.xl tr.help td{font-style:italic}
-.xl .xx,.xl .xh2{display:none}
+.sgw{margin:1mm 0 2mm}
+.sgc{border:.3mm solid #cfd3da;border-top:.8mm solid #1b2d55;border-radius:1.5mm;padding:1mm 2mm;margin:1mm 0;break-inside:avoid}
+.sgt{font-weight:700;color:#1b2d55;font-size:10.6pt;margin-bottom:.6mm}
+.sgn{background:#ff6a4d;color:#fff;border-radius:3mm;padding:0 2mm;margin-left:1.5mm;font-size:9.4pt}
+.sgf{display:none}
+table.sg{width:100%;border-collapse:collapse;font-size:10.4pt;table-layout:fixed}
+.sg td,.sg th{border-bottom:.2mm solid #e1ddd2;padding:.4mm 1.5mm}
+.sg tr.sgh th{background:#f2efe7;font-weight:700;text-align:center}.sg tr.sgh th:first-child{text-align:right}
+.sg td.nm{text-align:center;direction:ltr}.sg td.nm .n{display:inline-block;text-align:right}
+.sg td.dc{text-align:center;direction:ltr}
+.sg tr.sgsec td{background:#e8f1ea;font-weight:700}
+.sg tr.bal td{font-weight:700;border-top:.4mm solid #1b2d55}
+.sg tr.plug td{background:#fff3d6;font-weight:700}.sg tr.net td{background:#dcf5e6;font-weight:700}
+.sg tr.out td{color:#8a93aa}.sg tr.help td{font-style:italic}.sg tr.prev td{color:#46526b}
+.sg .xx,.fv .xx{display:none}
+.mv .dtx{display:none}
 ol.xln{font-size:9.8pt;margin:.8mm 0 0;padding-right:5mm;color:#2a3858}
 ol.xln li{margin-bottom:.2mm}
 .xst{font-weight:700;color:#c4421f;margin-top:1mm}

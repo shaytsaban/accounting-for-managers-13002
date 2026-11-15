@@ -45,7 +45,7 @@ def M(s):
     return ''.join(out)
 
 
-NUM = re.compile(r'(?<![\w.,/])\d[\d,]*(?:\.\d+)*%?')
+NUM = re.compile(r'(?<![\w.,/])-?\d+(?:,\d{3})*(?:\.\d+)*%?')
 
 
 def _textnum(seg):
