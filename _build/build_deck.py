@@ -48,7 +48,7 @@ NSELF = sum(s['id'].startswith('h-v') and 'class="mc"' in s['body'] for s in SL)
 NPREP -= NSELF
 NEXT_H, NEXT_P = META['next_h'], META['next_p']
 NCHK = sum(s['body'].count('class="ansb"') for s in SL)
-CNT = dict(NX=globals().get('NX', [0])[0], NPREP=NPREP, NSELF=NSELF, NCALC=NCALC, NCHK=NCHK, NMC=sum(s['body'].count('class="mc"') for s in SL))
+CNT = dict(NX=globals().get('NX', [0])[0], NPREP=NPREP, NSELF=NSELF, NCALC=NCALC, NCHK=NCHK, NMC=sum(s['body'].count('class="mc"') for s in SL), NLIVE=globals().get('NLIVE', [0])[0])
 slides_html = '\n'.join(filter(None, (render(s, TOTAL_PARTS) for s in SL)))
 
 fonts = R('shell/fonts.css')

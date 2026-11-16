@@ -200,6 +200,7 @@ KIND = {'together': 'מסבירים יחד', 'alone': 'נסו לבד', 'class': 
 
 def _qlines(p):
     """A story paragraph, one data item per line: numbered items split at (1), (2)..., otherwise one sentence per line."""
+    if isinstance(p, tuple): return f'<p class="qi" data-k="{p[0]}">{TX(p[1])}</p>'
     if re.search(r'\(\d+\)', p):
         parts = [s.strip() for s in re.split(r'\s*(?=\(\d+\))', p) if s.strip()]
     else:
@@ -223,7 +224,7 @@ def _qlines(p):
 def QCARD(kind, story, asks, cur=None, data='', wide=False):
     """wide: a question above a wide table; the data table sits beside the story, so the solution gets the height."""
     lab = KIND[kind]
-    ah = ''.join(f'<p class="{"cur" if cur and l in cur else ""}"><b>{l}.</b> {TX(t)}</p>' if l else f'<p class="{"cur" if cur else ""}">{TX(t)}</p>' for l, t in asks)
+    ah = ''.join(f'<p class="{"cur" if cur and l in cur else ""}" data-k="q{l}"><b>{l}.</b> {TX(t)}</p>' if l else f'<p class="{"cur" if cur else ""}" data-k="q">{TX(t)}</p>' for l, t in asks)
     st = '<div class="ql">' + ''.join(_qlines(p) for p in story) + '</div>'
     if wide and data:
         return (f'<div class="card qstem xq sm qw"><div class="qa"><span class="kd {kind}">{lab}</span>{st}<div class="asks"><b>נדרש:</b>{ah}</div></div><div class="qd">{data}</div></div>')
@@ -250,15 +251,16 @@ def XQ(key, title, kind, story, asks, slides, data='', stack=False, flow=None, l
             LIVEQ(sid + ('' if not j else f'l{j + 1}'), title + ('' if len(lives) == 1 else f' ({j + 1} מתוך {len(lives)})'), 'alone', story, asks, data, cfg, stack=stack)
     for i, sl in enumerate(slides):
         # stacked: the tip becomes the first text of the explanation panel beside the question
-        tipx = ' '.join(t for kd, t in sl.get('after', ())) if stack else None
-        h, pan, aft = SOL(sl['stages'], 1, flow, () if stack else sl.get('after', ()), sl.get('layout', ''), parts=True, joint=sl.get('joint', False),
+        stk = sl.get('stack', stack)
+        tipx = ' '.join(t for kd, t in sl.get('after', ())) if stk else None
+        h, pan, aft = SOL(sl['stages'], 1, flow, () if stk else sl.get('after', ()), sl.get('layout', ''), parts=True, joint=sl.get('joint', False),
                           tip=('<b>טיפ:</b> ' + tipx + ' ' + 'לחצו על מספר מסומן: כאן יופיע החישוב שלו.') if tipx else None)
         tag = '' if len(slides) == 1 else f' ({i + 1} מתוך {len(slides)})'
         kd = 'sol' if kind == 'alone' else kind
         head = f'{KIND[kd]}: {title}{tag}'
         q = QCARD(kd, story, asks, sl.get('cur'), data)
         # the explanation panel and the tips sit beside the question, where the slide has room
-        body = (f'<div class="xstack">{q}{h}<div class="qbot">{pan}{aft}</div></div>' if stack
+        body = (f'<div class="xstack">{q}{h}<div class="qbot">{pan}{aft}</div></div>' if stk
                 else f'<div class="xg"><div class="pqq">{q}{pan}{aft}</div><div class="pqa">{h}</div></div>')
         S(sid + ('s' if kind == 'alone' else '') + ('' if not i else f'c{i + 1}'), head, head, body, kick=f'חלק {CUR[0]} · {KIND[kd]}', cls='qslide')
     # the live sheet keeps only the requirements its solution slides dealt with
@@ -361,12 +363,77 @@ def LIVEQ(sid, title, kind, story, asks, data, cfg, stack=False):
 
 
 def WF(steps, n=1):
-    """The work process as a numbered flowchart, one step per click: (title, what to do, small example)."""
-    out = ''
-    for i, (t, d, ex) in enumerate(steps):
+    """The work process as a numbered flowchart, one step per click: (title, what to do, small example[, longer explanation[, the step on a small example]]).
+    With longer explanations, a click on a step shows its explanation in a panel under the chart."""
+    out, rich = '', any(len(s) > 3 for s in steps)
+    for i, s in enumerate(steps):
+        t, d, ex = s[:3]
+        more = s[3] if len(s) > 3 else ''
+        demo = s[4] if len(s) > 4 else ''
         if i: out += ST(n + i, '<span class="wfa">←</span>', cls='wfx')
-        out += ST(n + i, f'<span class="wfn">{i + 1}</span><b>{TX(t)}</b><span>{TX(d)}</span>' + (f'<em>{TX(ex)}</em>' if ex else ''), cls='wfs')
-    return f'<div class="wf n{len(steps)}">{out}</div>'
+        inner = f'<span class="wfn">{i + 1}</span><b>{TX(t)}</b><span>{TX(d)}</span>' + (f'<i class="wfd"><u>{TX("בדוגמה:")}</u> {TX(demo)}</i>' if demo else '') + (f'<em>{TX(ex)}</em>' if ex else '')
+        if more and MODE == 'deck': inner += f'<div class="xx"><b>{TX("שלב " + str(i + 1) + ", " + t)}:</b> {TX(more)}</div>'
+        if more and MODE == 'pdf': inner += f'<span class="wfm">{TX(more)}</span>'
+        out += ST(n + i, inner, cls='wfs' + (' ec auto' if more and MODE == 'deck' else ''))
+    h = f'<div class="wf n{len(steps)}{" rich" if rich and MODE == "pdf" else ""}">{out}</div>'
+    if rich and MODE == 'deck':
+        h = f'<div class="sgw wfw">{h}<div class="sgp">{TX("לחצו על שלב: כאן יופיע ההסבר המורחב שלו.")}</div></div>'
+    return h
+
+
+def AXIS(points, pre, post, title, num=1, use='הנכס עובד'):
+    """The dates of an asset on a time axis, with the border that sorts every payment: until the asset is available for use
+    a necessary payment enters the cost; from then on a payment is an expense, and depreciation starts.
+    points: (label, date, key of the question line, explanation), in time order; the last one is the date of availability."""
+    notes = [(f'{l} {d}', x) for l, d, k, x in points] + [('עד הזמינות לשימוש', pre), ('מן הזמינות והלאה', post)]
+
+    def fn(n0):
+        if MODE == 'pdf':
+            return '<ol class="xln">' + ''.join(f'<li><b>{TX(a)}:</b> {TX(b)}</li>' for a, b in notes) + '</ol>', n0, []
+        st = lambda k, cls, inner, x, h=(): (f'<div class="st {cls} ec auto" data-n="{(n0 + k) * 10}"' + (f' data-hl="{" ".join(h)}"' if h else '') + f'>{inner}<div class="xx"><b>{TX(x[0])}:</b> {TX(x[1])}</div></div>')
+        pts = ''
+        for i, (l, d, k, x) in enumerate(points):
+            if i: pts += '<i class="axl"></i>'
+            pts += st(i, 'axp' + (' key' if i == len(points) - 1 else ''), f'<b>{TX(l)}</b><span class="n">{d}</span>', notes[i], (k,) if k else ())
+        m = len(points)
+        # the axis runs from top to bottom: the dates on a rail, and beside it the two zones that the date of availability separates
+        h = ('<div class="ax"><div class="axrail">' + pts + f'<i class="axl go"></i><div class="axuse">{TX(use)}</div></div><div class="axz">'
+             + st(m, 'axcap pre', f'<b>{TX("עד הזמינות לשימוש")}</b><span>{TX("תשלום חיוני נכנס לעלות הנכס")}</span>', notes[m]).replace('class="st axcap pre', f'style="flex:{m * 38 + (m - 1) * 16} 1 0" class="st axcap pre')
+             + st(m + 1, 'axcap post', f'<b>{TX("מן הזמינות והלאה")}</b><span>{TX("תשלום הוא הוצאה. כאן מתחיל הפחת")}</span>', notes[m + 1]).replace('class="st axcap post', 'style="flex:74 1 0" class="st axcap post')
+             + '</div></div>')
+        return h, n0 + m + 2, []
+    return STG(num, title, [], [], fn=fn)
+
+
+def SORT3(rows, total_lab, total_x, num='שלבים 2 ו-3', title='ממיינים כל תשלום, וסוכמים את העלות', heads=('התשלום', 'לעלות הנכס', 'הוצאה ברווח והפסד')):
+    """Every payment in one of two columns: into the cost of the asset, or an expense. rows: (label, amount, 'c' or 'e', explanation, key of the question line)."""
+    r, cost = [], []
+    for i, (lab, v, to, xp, k) in enumerate(rows):
+        cell = C(v, '', xp, hl=(k,) if k else ())
+        r.append(RW(f'i{i}', [lab, cell, ''] if to == 'c' else [lab, '', cell], '' if to == 'c' else 'exp'))
+        if to == 'c': cost.append(i)
+    tot = sum(rows[i][1] for i in cost)
+    r.append(RW('t', [total_lab, C(tot, '=' + '+'.join(f'B#i{i}#' for i in cost), total_x, hl=tuple(rows[i][4] for i in cost if rows[i][4])), ''], 'net'))
+    return STG(num, title, list(heads), r, widths=[46, 27, 27])
+
+
+def RECAP(sid, title, formulas, tpl, parts, meaning, tpl_title='תבנית הפתרון', f_title='הנוסחאות', p_title='הרכיבים: מה נכנס, ומה לא', sep='='):
+    """The concentrate of a topic: its formulas, the recommended table template, the components, and what it all means.
+    formulas: (name, expression, explanation with an example). tpl: (sign, label, kind, explanation) rows, or ready html.
+    parts: (heading, 'in' / 'out' / '', [items])."""
+    pdf = MODE == 'pdf'
+    ec = lambda cls, inner, head, x: (f'<div class="{cls}">{inner}' + (f'<small>{TX(x)}</small>' if x else '') + '</div>' if pdf
+                                      else f'<div class="{cls} ec">{inner}<div class="xx"><b>{TX(head)}:</b> {TX(x)}</div></div>')
+    fh = ''.join(ec('rcf', f'<b>{TX(nm)}</b><span class="eqs">{sep}</span><span class="rce">{TX(ex)}</span>', nm, x) for nm, ex, x in formulas)
+    if isinstance(tpl, str): th = tpl
+    else: th = '<div class="rct">' + ''.join(ec('rcr ' + kd, f'<i>{sg}</i><label>{TX(lab)}</label>', lab, x) for sg, lab, kd, x in tpl) + '</div>'
+    ph = ''.join(f'<div class="rcq {dict(i="rin", o="rout").get(kd[:1], "rany")}"><b>{TX(hd)}</b><ul>' + ''.join(f'<li>{TX(t)}</li>' for t in items) + '</ul></div>' for hd, kd, items in parts)
+    card = lambda n, cls, hd, inner: (f'<div class="rcc {cls}"><h4>{TX(hd)}</h4>{inner}</div>' if pdf else ST(n, f'<h4>{TX(hd)}</h4>{inner}', cls='rcc ' + cls))
+    body = ('<div class="rcg">' + card(1, 'kf', f_title, fh) + card(2, 'kt', tpl_title, th) + card(3, 'kp', p_title, f'<div class="rcps">{ph}</div>')
+            + card(4, 'km', 'המשמעות העקרונית', f'<p>{TX(meaning)}</p>') + '</div>')
+    if not pdf:
+        body = f'<div class="sgw rcw">{body}<div class="sgp">{TX("לחצו על נוסחה או על שורה בתבנית: כאן יופיע ההסבר שלה, עם דוגמה.")}</div></div>'
+    S(sid, title, title, body, kick=f'חלק {CUR[0]} · ריכוז הנושא')
 
 
 # ---------------------------------------------------------------- memes: an original cartoon with a caption above and below
@@ -498,7 +565,7 @@ def MONTHS(start, end):
     return (end[0] - start[0]) * 12 + end[1] - start[1]
 
 
-def TLINE(start, end, annual, end_lab, title, num=None, back=None, back_lab=''):
+def TLINE(start, end, annual, end_lab, title, num=None, back=None, back_lab='', hl=(), hl_end=()):
     """Depreciation along time: one box per calendar year from the date the asset is available (start, first of month)
     to end (first of month; 31.12.Y is (Y + 1, 1)); each box shows its months and its depreciation, revealed year by year."""
     yrs = []
@@ -515,13 +582,13 @@ def TLINE(start, end, annual, end_lab, title, num=None, back=None, back_lab=''):
     def fn(n0):
         if MODE == 'pdf':
             return '<ol class="xln">' + ''.join(f'<li>{TX(a)}: {TX(b)}</li>' for a, b in notes) + '</ol>', n0, []
-        st = lambda k, cls, inner, x=None: (f'<div class="st {cls}{" ec auto" if x else ""}" data-n="{(n0 + k) * 10}">{inner}'
-                                            + (f'<div class="xx"><b>{TX(x[0])}:</b> {TX(x[1])}</div>' if x else '') + '</div>')
+        st = lambda k, cls, inner, x=None, h=(): (f'<div class="st {cls}{" ec auto" if x else ""}" data-n="{(n0 + k) * 10}"' + (f' data-hl="{" ".join(h)}"' if h else '') + f'>{inner}'
+                                                  + (f'<div class="xx"><b>{TX(x[0])}:</b> {TX(x[1])}</div>' if x else '') + '</div>')
         h = '<div class="dtl">'
-        top = f'<b>{TX("פחת לשנה מלאה: " + f2(annual) + " ש״ח")}</b> {TX("מתחילים מן המועד שבו הנכס זמין לשימוש, ולא מיום הרכישה.")}'
+        top = f'<b>{TX("פחת לשנה מלאה: " + f2(annual) + " ש״ח")}</b> {TX("סופרים מן הזמינות לשימוש.")}'
         h += '<div class="fvtop">' + st(0, 'fvs', top) + (f'<button class="lnk" data-go="{back}">{TX(back_lab)}</button>' if back and MODE == 'deck' else '') + '</div>'
-        boxes = ''.join(st(1 + i, 'tly', f'<b class="n">{y}</b><span>{TX(f"{m} חודשים")}</span><em>{TX(f2(annual * m / 12))}</em>', notes[i]) .replace('class="st tly', f'style="flex:{m} 1 0" class="st tly') for i, (y, m) in enumerate(yrs))
+        boxes = ''.join(st(1 + i, 'tly', f'<b class="n">{y}</b><span>{TX(f"{m} חודשים")}</span><em>{TX(f2(annual * m / 12))}</em>', notes[i], tuple(hl) if i == 0 else (tuple(hl_end) if i == len(yrs) - 1 else ())) .replace('class="st tly', f'style="flex:{m} 1 0" class="st tly') for i, (y, m) in enumerate(yrs))
         h += f'<div class="tltime"><span>{TX("זמין לשימוש")}</span><i></i><span>{TX(end_lab)}</span></div><div class="tlrow">{boxes}</div>'
-        h += st(1 + len(yrs), 'fvtot', TX(f'{tot} חודשים ({span}): פחת נצבר <b>{f2(annual * tot / 12)}</b> ש״ח'), notes[-1])
+        h += st(1 + len(yrs), 'fvtot', TX(f'{tot} חודשים ({span}): פחת נצבר <b>{f2(annual * tot / 12)}</b> ש״ח'), notes[-1], tuple(hl) + tuple(hl_end))
         return h + '</div>', n0 + 2 + len(yrs), []
     return STG(num, title, [], [], fn=fn)

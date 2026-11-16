@@ -83,7 +83,7 @@ R.ans=[];document.querySelectorAll('.ansb').forEach(a=>{const sl=a.closest('.sli
 // sheets: a click on a cell fills the panel and does not move the slide; practice cells accept the right value only
 // alignment: in every table, the content of each column (after the first) shares one centre line, header included
 R.align=[];D.slides.forEach((s,i)=>{D.show(i);D.setAll(s,true);const k=stage.getBoundingClientRect().width/1280;
- s.querySelectorAll('table.sg').forEach((tb,ti)=>{const rows=[...tb.rows];const n=Math.max(...rows.map(r=>r.cells.length));
+ s.querySelectorAll('table.sg').forEach((tb,ti)=>{const k=tb.getBoundingClientRect().width/tb.offsetWidth;const rows=[...tb.rows];const n=Math.max(...rows.map(r=>r.cells.length));
   for(let ci=1;ci<n;ci++){if(tb.classList.contains('rt')&&ci===1)continue;const cs=[];
    rows.forEach(r=>{if(r.cells.length!==n)return;const td=r.cells[ci];if(!td||!td.textContent.replace(/\s/g,''))return;const sp=td.classList.contains('nm')?td.querySelector(':scope>.n,:scope>.cs>.n'):null;let rc;
     if(sp){rc=sp.getBoundingClientRect();}else{const rg=document.createRange();rg.selectNodeContents(td);rc=rg.getBoundingClientRect();}
@@ -95,7 +95,7 @@ R.align=[];D.slides.forEach((s,i)=>{D.show(i);D.setAll(s,true);const k=stage.get
 R.xl=[];R.xlN=0;R.fit=[];document.querySelectorAll('.sgw').forEach(w=>{const sl=w.closest('.slide');D.go(sl.id);D.setAll(sl,true);let longest='';
  w.querySelectorAll('.ec').forEach(c=>{R.xlN++;const cur=D.cur();c.dispatchEvent(new MouseEvent('click',{bubbles:true}));const p=(w.querySelector('.sgp')||sl.querySelector('.sgp'));const tx=p?p.textContent:'';
   if(D.cur()!==cur||tx.length<8||!c.classList.contains('sel'))R.xl.push({id:sl.id,a:c.dataset.a,p:tx.slice(0,30)});
-  if(c.dataset.hl&&c.dataset.hl.split(' ').some(k=>!sl.querySelector('.mv tr.hl[data-k="'+k+'"]')))R.xl.push({id:sl.id,hl:c.dataset.hl});
+  if(c.dataset.hl&&c.dataset.hl.split(' ').some(k=>!sl.querySelector('.hl[data-k="'+k+'"]')))R.xl.push({id:sl.id,hl:c.dataset.hl});
   const x=c.querySelector('.xx');if(x&&x.innerHTML.length>longest.length)longest=x.innerHTML;});
  w.querySelectorAll('.sga').forEach(x=>{D.sgShow(x);if(!x.querySelector('svg path.ap'))R.xl.push({id:sl.id,arrow:x.dataset.from+'>'+x.dataset.to});});
  const p=w.querySelector('.sgp')||sl.querySelector('.sgp');if(p&&longest){p.innerHTML=longest;const k=stage.getBoundingClientRect().width/1280,b=(p.getBoundingClientRect().bottom-stage.getBoundingClientRect().top)/k,lim=sl.querySelector('.ft')?684:716;if(b>lim+.5)R.fit.push({id:sl.id,bottom:Math.round(b)});}

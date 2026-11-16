@@ -234,6 +234,25 @@ ol.xln li{margin-bottom:.2mm}
 .wf{display:grid;grid-template-columns:repeat(6,1fr);gap:1.5mm}.wfx{display:none}
 .wfs{border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm 1.5mm;font-size:10pt;display:flex;flex-direction:column}
 .wfs b{color:var(--navy)}.wfn{font-weight:700;color:#c4421f}.wfs em{font-style:normal;color:#167a43}
+.wf.rich{display:block}
+.wf.rich .wfs{display:grid;grid-template-columns:6mm 34mm 1fr;column-gap:2mm;align-items:start;margin-bottom:1mm;break-inside:avoid}
+.wf.rich .wfs>b{grid-column:2;grid-row:1}.wf.rich .wfs>.wfn{grid-column:1;grid-row:1}
+.wf.rich .wfs>span,.wf.rich .wfs>i,.wf.rich .wfs>em{grid-column:3}
+.wfs i.wfd{font-style:normal;color:#1b2d55}.wfs i.wfd u{text-decoration:none;font-weight:700;color:#2f6fe0}
+.wfs .wfm{color:#2a3858}
+.qstem .qi{margin:0 0 .3mm;font-weight:400}.qstem .qh{margin:.6mm 0 .2mm}
+.sg tr.exp td{background:#fff6f4}
+.rcg{display:grid;grid-template-columns:1.15fr .85fr;gap:1.5mm}
+.rcc{border:.3mm solid #cfd3da;border-top:.8mm solid #1b2d55;border-radius:1.5mm;padding:1mm 2mm;break-inside:avoid}
+.rcc h4{margin:0 0 .6mm;font-size:10.5pt;color:#c4421f}
+.rcc.km{background:#f2f4f8}.rcc.km p{margin:0;font-weight:700}
+.rcf{border-bottom:.2mm solid #e1ddd2;padding:.4mm 0;font-size:10pt}.rcf b{color:#1b2d55}.rcf .eqs{color:#c4421f;font-weight:700;margin:0 1mm}
+.rcf small,.rcr small{display:block;font-size:9pt;color:#46526b}
+.rcr{border-bottom:.2mm solid #e1ddd2;padding:.3mm 0;font-size:10pt}.rcr i{font-style:normal;font-weight:700;color:#c4421f;display:inline-block;width:5mm;text-align:center}
+.rcr label{font-weight:600}.rcr.bal label,.rcr.net label{font-weight:700}.rcr.net{background:#dcf5e6}
+.rcps{display:grid;grid-template-columns:1fr 1fr;gap:2mm}.rcq ul{margin:.3mm 0 0;padding-right:4mm}.rcq li{font-size:9.8pt}
+.rcq.rin b{color:#167a43}.rcq.rout b{color:#b3262f}
+
 .memer{display:flex;gap:3mm;align-items:center}.meme{width:70mm;text-align:center;border:.25mm solid var(--line);border-radius:1.4mm;padding:1mm}
 .mimg{width:100%;height:auto;max-height:38mm}.mtop,.mbot{font-weight:700}
 '''
