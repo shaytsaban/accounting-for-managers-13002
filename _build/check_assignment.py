@@ -37,8 +37,20 @@ for h in hits: print('  ', h)
 # figures: split the assignment by question and look for slides sharing 3 or more of a question's large figures
 nums = re.compile(r'\d{1,3}(?:,\d{3})+')
 qs = {}
-for m in re.finditer(r'(?:^|\n)\s*שאלה(\d+)\s*\n(.*?)(?=\n\s*שאלה\d+\s*\n|\Z)', raw, re.S):
-    qs[int(m.group(1))] = set(nums.findall(m.group(2)))
+# the text is cut at every question heading ("שאלה 3", with or without a space) and at every shared data heading ("נתונים לשאלות").
+# The range of a shared data block is not always readable in the pdf text, so its figures count for every question after it,
+# up to the next shared block: this errs on the strict side.
+marks = [(m.start(), 'q', int(m.group(1))) for m in re.finditer(r'(?:^|\n)\s*שאלה\s*(\d+)\b', raw)]
+marks += [(m.start(), 'd', 0) for m in re.finditer(r'נתונים לשאלות', raw)]
+marks.sort()
+shared = set()
+for j, (pos, kind, q) in enumerate(marks):
+    end = marks[j + 1][0] if j + 1 < len(marks) else len(raw)
+    figs = set(nums.findall(raw[pos:end]))
+    if kind == 'd': shared = figs
+    else: qs[q] = figs | shared
+deck = re.sub(r'data-cfg="[^"]*"', '', deck)   # the configuration of a live sheet repeats the figures of its slide
+blocks = {m.group(1): m.group(0) for m in re.finditer(r'<section class="slide[^"]*" id="([^"]+)".*?</section>', deck, re.S)}
 print('questions parsed:', sorted(qs))
 for q, ns in sorted(qs.items()):
     for sid, b in blocks.items():
